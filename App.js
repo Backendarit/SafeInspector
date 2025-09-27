@@ -3,10 +3,11 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import HomeScreen from './views/Home';
-import ClientList from './views/ClientList';
-import WorkQueue from './views/WorkQueue';
-import ProfileScreen from './views/ProfileScreen';
+import HomeScreen from './screen/Home';
+import ClientList from './screen/ClientList';
+import WorkQueue from './screen/WorkQueue';
+import ProfileScreen from './screen/ProfileScreen';
+import SiteDetail from './screen/SiteDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="Clients" component={ClientList} />
         <Stack.Screen name="Work Queue" component={WorkQueue} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="SiteDetail" component={SiteDetail} display="none" />
       </Stack.Navigator>
     </NavigationContainer>
   );
