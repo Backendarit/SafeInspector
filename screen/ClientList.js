@@ -38,7 +38,7 @@ export default function ClientList() {
         value={search}
         onChangeText={setSearch}
       />
-
+      {/* Lisää asiakas */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddClient")}
