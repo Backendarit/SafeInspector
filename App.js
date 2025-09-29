@@ -34,7 +34,17 @@ export default function App() {
 
         <Stack.Screen name="Work Queue" component={WorkQueue} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="SiteDetail" component={SiteDetail} />
+
+        {/* Viedään clients ja setClients myös SiteDetail-sivulle */}
+        <Stack.Screen name="SiteDetail">
+          {(props) => (
+            <SiteDetail
+              {...props}
+              clients={clients}
+              setClients={setClients}
+            />
+          )}
+        </Stack.Screen>
 
         <Stack.Screen name="AddClient">
           {(props) => (
@@ -45,5 +55,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-//Azure Deploy
+
+// Azure Deploy
 export const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;

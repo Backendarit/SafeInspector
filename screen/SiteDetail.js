@@ -1,11 +1,78 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
-export default function SiteDetail() {
-  const route = useRoute();
-  const { site, client } = route.params;
+// Update Inspection and count the next one
+function updateInspection(extinguisher) {
+  const today = new Date();
+  const lastInspection = today.toISOString().split("T")[0];
+  const nextInspection = new Date(
+    today.setFullYear(today.getFullYear() + extinguisher.intervalYears)
+  )
+    .toISOString()
+    .split("T")[0];
 
+  return {
+    ...extinguisher,
+    lastInspection,
+    nextInspection,
+  };
+}
+
+  //Show selected Site
+export default function SiteDetail({ navigation }) {
+  const route = useRoute();
+  const { site, client, setClients } = route.params;
+
+  // Update inspection
+  const handleUpdateInspection = (extinguisherId) => {
+    setClients((prevClients) =>
+      prevClients.map((c) =>
+        c.id === client.id
+          ? {
+              ...c,
+              sites: c.sites.map((s) =>
+                s.id === site.id
+                  ? {
+                      ...s,
+                      extinguishers: s.extinguishers.map((ext) =>
+                        ext.id === extinguisherId
+                          ? updateInspection(ext)
+                          : ext
+                      ),
+                    }
+                  : s
+              ),
+            }
+          : c
+      )
+    );
+  };
+
+    // Delete Extinguisher
+  const handleDeleteExtinguisher = (extinguisherId) => {
+    setClients((prevClients) =>
+      prevClients.map((c) =>
+        c.id === client.id
+          ? {
+              ...c,
+              sites: c.sites.map((s) =>
+                s.id === site.id
+                  ? {
+                      ...s,
+                      extinguishers: s.extinguishers.filter(
+                        (ext) => ext.id !== extinguisherId
+                      ),
+                    }
+                  : s
+              ),
+            }
+          : c
+      )
+    );
+  };
+
+  //Show Site details and it's Extinguishers
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{site.name}</Text>
@@ -29,6 +96,22 @@ export default function SiteDetail() {
             <Text>Service Due: {item.serviceDue}</Text>
             <Text>Status: {item.status}</Text>
             {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+
+            {/* UPDATE INSPECTION */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleUpdateInspection(item.id)}
+            >
+              <Text style={styles.buttonText}>Update Inspection</Text>
+            </TouchableOpacity>
+
+            {/* DELETE */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#ff4d4d" }]}
+              onPress={() => handleDeleteExtinguisher(item.id)}
+            >
+              <Text style={styles.buttonText}>Delete</Text>
+            </TouchableOpacity>
           </View>
         )}
       />

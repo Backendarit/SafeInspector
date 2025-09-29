@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/d9d37e44-46c1-44de-8d73-b53aefbe4deb/resourceGroups/Backendarit_group/providers/Microsoft.Web/sites/SafeInspector",
+    "appService.deploySubpath": "."
+}
