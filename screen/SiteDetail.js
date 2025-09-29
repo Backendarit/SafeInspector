@@ -1,78 +1,127 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { BASE_URL } from "../config";
 
-// Update Inspection and count the next one
+// Päivittää tarkastustiedot sammuttimelle
 function updateInspection(extinguisher) {
   const today = new Date();
   const lastInspection = today.toISOString().split("T")[0];
-  const nextInspection = new Date(
-    today.setFullYear(today.getFullYear() + extinguisher.intervalYears)
-  )
-    .toISOString()
-    .split("T")[0];
+
+  // Seuraava tarkastus = nykyinen päivä + intervalYears
+  const nextInspectionDate = new Date(today);
+  nextInspectionDate.setFullYear(today.getFullYear() + extinguisher.intervalYears);
+  const nextInspection = nextInspectionDate.toISOString().split("T")[0];
+
+  // Huolto erääntyy = valmistusvuosi + 10
+  const serviceDue = extinguisher.manufactureYear + 10;
 
   return {
     ...extinguisher,
     lastInspection,
     nextInspection,
+    serviceDue,
   };
 }
 
-  //Show selected Site
-export default function SiteDetail({ navigation }) {
+export default function SiteDetail({ navigation, setClients }) {
   const route = useRoute();
-  const { site, client, setClients } = route.params;
+  const { site, client } = route.params; // näistä tulee navigoinnin mukana
+  const [loading, setLoading] = useState(false);
 
-  // Update inspection
-  const handleUpdateInspection = (extinguisherId) => {
-    setClients((prevClients) =>
-      prevClients.map((c) =>
-        c.id === client.id
-          ? {
-              ...c,
-              sites: c.sites.map((s) =>
-                s.id === site.id
-                  ? {
-                      ...s,
-                      extinguishers: s.extinguishers.map((ext) =>
-                        ext.id === extinguisherId
-                          ? updateInspection(ext)
-                          : ext
-                      ),
-                    }
-                  : s
-              ),
-            }
-          : c
-      )
-    );
+  // Päivitä tarkastus backendissä ja tilassa
+  const handleUpdateInspection = async (extinguisher) => {
+    const updatedExt = updateInspection(extinguisher);
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedExt),
+        }
+      );
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      // Päivitetään local state
+      setClients((prevClients) =>
+        prevClients.map((c) =>
+          c.id === client.id
+            ? {
+                ...c,
+                sites: c.sites.map((s) =>
+                  s.id === site.id
+                    ? {
+                        ...s,
+                        extinguishers: s.extinguishers.map((ext) =>
+                          ext.id === extinguisher.id ? updatedExt : ext
+                        ),
+                      }
+                    : s
+                ),
+              }
+            : c
+        )
+      );
+      Alert.alert("Success", "Inspection updated successfully.");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to update inspection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-    // Delete Extinguisher
-  const handleDeleteExtinguisher = (extinguisherId) => {
-    setClients((prevClients) =>
-      prevClients.map((c) =>
-        c.id === client.id
-          ? {
-              ...c,
-              sites: c.sites.map((s) =>
-                s.id === site.id
-                  ? {
-                      ...s,
-                      extinguishers: s.extinguishers.filter(
-                        (ext) => ext.id !== extinguisherId
-                      ),
-                    }
-                  : s
-              ),
-            }
-          : c
-      )
-    );
+  // Poista sammutin backendistä ja tilasta
+  const handleDeleteExtinguisher = async (extinguisherId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisherId}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      // Päivitetään local state
+      setClients((prevClients) =>
+        prevClients.map((c) =>
+          c.id === client.id
+            ? {
+                ...c,
+                sites: c.sites.map((s) =>
+                  s.id === site.id
+                    ? {
+                        ...s,
+                        extinguishers: s.extinguishers.filter(
+                          (ext) => ext.id !== extinguisherId
+                        ),
+                      }
+                    : s
+                ),
+              }
+            : c
+        )
+      );
+      Alert.alert("Deleted", "Extinguisher deleted successfully.");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to delete extinguisher.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  //Show Site details and it's Extinguishers
+  // Renderöi näkymä
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{site.name}</Text>
@@ -81,7 +130,21 @@ export default function SiteDetail({ navigation }) {
       <Text>Contact: {site.contact.name}</Text>
       <Text>Phone: {site.contact.phone}</Text>
 
+      {/* Add New Extinguisher */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() =>
+          navigation.navigate("AddExtinguisher", {
+            clientId: client.id,
+            siteId: site.id,
+          })
+        }
+      >
+        <Text style={styles.addButtonText}>+ Add Extinguisher</Text>
+      </TouchableOpacity>
+
       <Text style={styles.sectionTitle}>Extinguishers</Text>
+      {loading && <ActivityIndicator size="large" color="green" />}
       <FlatList
         data={site.extinguishers}
         keyExtractor={(item) => item.id}
@@ -100,17 +163,24 @@ export default function SiteDetail({ navigation }) {
             {/* UPDATE INSPECTION */}
             <TouchableOpacity
               style={styles.button}
-              onPress={() => handleUpdateInspection(item.id)}
+              onPress={() => handleUpdateInspection(item)}
             >
               <Text style={styles.buttonText}>Update Inspection</Text>
             </TouchableOpacity>
 
-            {/* DELETE */}
+          
+            {/* EDIT */}
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#ff4d4d" }]}
-              onPress={() => handleDeleteExtinguisher(item.id)}
+              style={[styles.button, { backgroundColor: "#4d94ff" }]}
+              onPress={() =>
+                navigation.navigate("EditExtinguisher", {
+                  extinguisher: item,
+                  site,
+                  client,
+                })
+              }
             >
-              <Text style={styles.buttonText}>Delete</Text>
+              <Text style={styles.buttonText}>Edit</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -141,4 +211,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 4,
   },
+  addButton: {
+  backgroundColor: "green",
+  padding: 12,
+  borderRadius: 8,
+  alignItems: "center",
+  marginBottom: 12,
+},
+addButtonText: {
+  color: "#fff",
+  fontWeight: "bold",
+},
 });

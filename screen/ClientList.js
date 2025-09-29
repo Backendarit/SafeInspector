@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { BASE_URL } from "../config";
 
 export default function ClientList() {
   const navigation = useNavigation();
@@ -29,13 +30,14 @@ export default function ClientList() {
   // Azure Data
     const fetchClients = async () => {
       try {
-        const response = await fetch(
-          "https://safeinspector.azurewebsites.net/api/clients"
-        );
+        const response = await fetch(`${BASE_URL}/api/clients`);
+        console.log("Fetching:", `${BASE_URL}/api/clients`);
+
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Received data:", data); // debug
         setClients(data); // save data to setClients
         setError(null); // tyhjennä aiemmat virheet onnistuneella fetchillä
       } catch (err) {

@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { BASE_URL } from "../config";
 
 export default function AddClient({ navigation, clients = [], setClients }) {
   const [selectedClient, setSelectedClient] = useState("new");
@@ -16,8 +17,9 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   const [address, setAddress] = useState("");
   const [contact, setContact] = useState("");
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false); // load POST
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedClient === "new" && clientName.trim() === "") {
       Alert.alert("Error", "Please enter a client name.");
       return;
@@ -27,49 +29,50 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       return;
     }
 
-    if (selectedClient === "new") {
-      // luodaan uusi asiakas
-      const newClient = {
-        id: Date.now().toString(),
-        name: clientName,
-        sites: [
-          {
-            id: Date.now().toString() + "-site",
-            name: siteName,
-            address,
-            contact,
-            phone,
-            extinguishers: [],
-          },
-        ],
-      };
-      setClients((prev) => [...prev, newClient]);
-    } else {
-      // lisätään kohde olemassa olevaan asiakkaaseen
-      setClients((prev) =>
-        prev.map((c) =>
-          c.id === selectedClient
-            ? {
-                ...c,
-                sites: [
-                  ...c.sites,
-                  {
-                    id: Date.now().toString() + "-site",
-                    name: siteName,
-                    address,
-                    contact,
-                    phone,
-                    extinguishers: [],
-                  },
-                ],
-              }
-            : c
-        )
-      );
-    }
 
-    Alert.alert("Saved!", "Data was saved successfully.");
-    navigation.goBack();
+    // New Client
+    const newClient = {
+      name: clientName,
+      businessId: "",
+      sites: [
+        {
+          id: Date.now().toString() + "-site",
+          name: siteName,
+          address,
+          contact: { name: contact, phone }, // huom: backend odottaa objektia
+          extinguishers: [],
+        },
+      ],
+    };
+
+    setLoading(true);
+
+
+    // POST to Azure
+    try {
+      const response = await fetch(`${BASE_URL}/api/clients`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newClient),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const savedClient = await response.json();
+
+      // Show the new client on client list
+      setClients((prev) => [...prev, savedClient.client]);
+
+      Alert.alert("Saved!", "Client was added successfully.");
+      navigation.goBack();
+    } catch (err) {
+      console.error("Error saving client:", err);
+      Alert.alert("Error", "Failed to save client. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,13 +86,11 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         style={styles.input}
       >
         <Picker.Item label="New client" value="new" />
-        {clients && clients.length > 0 ? (
-          clients.map((c) => (
-            <Picker.Item key={c.id} label={c.name} value={c.id} />
-          ))
-        ) : (
-          <Picker.Item label="No clients yet" value="none" />
-        )}
+        {clients && clients.length > 0
+          ? clients.map((c) => (
+              <Picker.Item key={c.id} label={c.name} value={c.id} />
+            ))
+          : null}
       </Picker>
 
       {selectedClient === "new" && (
@@ -137,8 +138,14 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         keyboardType="phone-pad"
       />
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveText}>Save</Text>
+      <TouchableOpacity
+        style={[styles.saveButton, loading && { opacity: 0.6 }]}
+        onPress={handleSave}
+        disabled={loading}
+      >
+        <Text style={styles.saveText}>
+          {loading ? "Saving..." : "Save"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
