@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,39 +6,87 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { clients } from "../data/clientsData";
 
 export default function ClientList() {
   const navigation = useNavigation();
   const route = useRoute();
 
+  // Search bar
   const initialSearch = route.params?.search || "";
   const [search, setSearch] = useState(initialSearch);
 
+  // Client Data
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true); // lataus-indikaattori
+  const [refreshing, setRefreshing] = useState(false); // pull-to-refresh state
+  const [error, setError] = useState(null); 
   const [expandedClientId, setExpandedClientId] = useState(null);
 
-  // Suodata asiakkaat
+  // Azure Data
+    const fetchClients = async () => {
+      try {
+        const response = await fetch(
+          "https://safeinspector.azurewebsites.net/api/clients"
+        );
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const data = await response.json();
+        setClients(data); // save data to setClients
+        setError(null); // tyhjennä aiemmat virheet onnistuneella fetchillä
+      } catch (err) {
+        console.error("Error fetching clients:", err);
+        setError("Failed to load clients. Please try again later.");
+      } finally {
+        setLoading(false); // hide load
+        setRefreshing(false); // lopeta refresh-tilanne
+      }
+    };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  // Search by name
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Expand Client to Sites
   const toggleExpand = (id) => {
     setExpandedClientId(expandedClientId === id ? null : id);
   };
 
+  // Pull-to-refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchClients();
+  };
+
+  if (loading) {
+    // Show loading
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="green" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Hakukenttä */}
+      {/* Searchbar */}
       <TextInput
         style={styles.search}
         placeholder="Search clients..."
         value={search}
         onChangeText={setSearch}
       />
-      {/* Lisää asiakas */}
+
+      {/* Add CLient */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddClient")}
@@ -46,19 +94,21 @@ export default function ClientList() {
         <Ionicons name="add-circle" size={28} color="green" />
       </TouchableOpacity>
 
-      {/* Lista asiakkaista */}
+      {/* Client List */}
       <FlatList
         data={filteredClients}
         keyExtractor={(item) => item.id}
+        refreshing={refreshing}   // Pull-to-refresh 
+        onRefresh={onRefresh}     
         renderItem={({ item }) => (
           <View style={styles.clientCard}>
-            {/* Asiakas */}
+            {/* Clients */}
             <TouchableOpacity onPress={() => toggleExpand(item.id)}>
               <Text style={styles.clientName}>{item.name}</Text>
               <Text style={styles.siteCount}>{item.sites.length} sites</Text>
             </TouchableOpacity>
 
-            {/* Kohteet näkyviin jos asiakas avattu */}
+            {/* Widen to Sites if Client is open */}
             {expandedClientId === item.id && (
               <View style={styles.sitesContainer}>
                 {item.sites.map((site) => (
