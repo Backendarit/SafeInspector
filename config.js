@@ -1,6 +1,5 @@
 // config.js
-//for using Android emulator
-export const BASE_URL = "http://10.0.2.2:8080";
+export const BASE_URL = "https://safeinspector.azurewebsites.net";
 
-//for using azure
-//export const BASE_URL = "https://safeinspector.azurewebsites.net/";
+//local connection http://10.0.2.2:8080
+//azure https://safeinspector.azurewebsites.net
