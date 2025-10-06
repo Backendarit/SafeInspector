@@ -5,10 +5,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { BASE_URL } from "../config";
+import styles from '../components/styles';
 
 export default function AddExtinguisher({ route, navigation }) {
   const { clientId, siteId } = route.params;
@@ -62,72 +62,52 @@ export default function AddExtinguisher({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add Extinguisher</Text>
+    <View style={styles.addExtContainer}>
+      <Text style={styles.addExtTitle}>Add Extinguisher</Text>
 
       <TextInput
-        style={styles.input}
+        style={styles.addExtinput}
         placeholder="Type (e.g. Tamrex 6kg ABC)"
         value={type}
         onChangeText={setType}
       />
       <TextInput
-        style={styles.input}
+        style={styles.addExtInput}
         placeholder="Location (e.g. Backroom)"
         value={location}
         onChangeText={setLocation}
       />
       <TextInput
-        style={styles.input}
+        style={styles.addExtInput}
         placeholder="Manufacture Year (e.g. 2019)"
         value={manufactureYear}
         onChangeText={setManufactureYear}
         keyboardType="numeric"
       />
       <TextInput
-        style={styles.input}
+        style={styles.addExtInput}
         placeholder="Last Inspection (YYYY-MM-DD)"
         value={lastInspection}
         onChangeText={setLastInspection}
       />
       <TextInput
-        style={styles.input}
+        style={styles.addExtInput}
         placeholder="Interval Years"
         value={intervalYears}
         onChangeText={setIntervalYears}
         keyboardType="numeric"
       />
       <TextInput
-        style={styles.input}
+        style={styles.addExtInput}
         placeholder="Notes"
         value={notes}
         onChangeText={setNotes}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Save Extinguisher</Text>
+      <TouchableOpacity style={styles.addExtButton} onPress={handleSave}>
+        <Text style={styles.addExtButtonText}>Save Extinguisher</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
-    backgroundColor: "#fff",
-  },
-  button: {
-    backgroundColor: "green",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-});

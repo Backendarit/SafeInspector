@@ -4,11 +4,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { BASE_URL } from "../config";
+
+import styles from '../components/styles';
 
 export default function AddClient({ navigation, clients = [], setClients }) {
   const [selectedClient, setSelectedClient] = useState("new");
@@ -151,40 +152,3 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f9f9f9",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: "#fff",
-  },
-  saveButton: {
-    backgroundColor: "green",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});

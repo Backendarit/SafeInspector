@@ -1,55 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import styles from '../components/styles';
 
 export default function HomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SafeInspector 🚒</Text>
+    <View style={styles.homeContainer}>
+      <Text style={styles.homeTitle}>SafeInspector 🚒</Text>
       <TouchableOpacity
-        style={styles.button}
+        style={styles.homeButton}
         onPress={() => navigation.navigate('Clients')}
       >
-        <Text style={styles.buttonText}>Go to Clients</Text>
+        <Text style={styles.homeButtonText}>Go to Clients</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.button}
+        style={styles.homeButton}
         onPress={() => navigation.navigate('Work Queue')}
       >
-        <Text style={styles.buttonText}>Go to Work Queue</Text>
+        <Text style={styles.homeButtonText}>Go to Work Queue</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.button}
+        style={styles.homeButton}
         onPress={() => navigation.navigate('Profile')}
       >
-        <Text style={styles.buttonText}>Go to Profile</Text>
+        <Text style={styles.homeButtonText}>Go to Profile</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#D2D5D7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 40,
-    color: '#000',
-  },
-  button: {
-    backgroundColor: '#000',
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});

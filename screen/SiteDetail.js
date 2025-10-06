@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   Alert,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { BASE_URL } from "../config";
+import styles from '../components/styles';
 
 // Päivittää tarkastustiedot sammuttimelle
 function updateInspection(extinguisher) {
@@ -123,16 +123,16 @@ export default function SiteDetail({ navigation, setClients }) {
 
   // Renderöi näkymä
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{site.name}</Text>
-      <Text style={styles.subtitle}>Client: {client.name}</Text>
+    <View style={styles.siteContainer}>
+      <Text style={styles.siteTitle}>{site.name}</Text>
+      <Text style={styles.siteSubtitle}>Client: {client.name}</Text>
       <Text>Address: {site.address}</Text>
       <Text>Contact: {site.contact.name}</Text>
       <Text>Phone: {site.contact.phone}</Text>
 
       {/* Add New Extinguisher */}
       <TouchableOpacity
-        style={styles.addButton}
+        style={styles.siteAddButton}
         onPress={() =>
           navigation.navigate("AddExtinguisher", {
             clientId: client.id,
@@ -140,17 +140,17 @@ export default function SiteDetail({ navigation, setClients }) {
           })
         }
       >
-        <Text style={styles.addButtonText}>+ Add Extinguisher</Text>
+        <Text style={styles.siteAddButtonText}>+ Add Extinguisher</Text>
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Extinguishers</Text>
+      <Text style={styles.siteSectionTitle}>Extinguishers</Text>
       {loading && <ActivityIndicator size="large" color="green" />}
       <FlatList
         data={site.extinguishers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.extinguisherName}>{item.type}</Text>
+          <View style={styles.siteCard}>
+            <Text style={styles.siteExtinguisherName}>{item.type}</Text>
             <Text>Location: {item.location}</Text>
             <Text>Manufacture Year: {item.manufactureYear}</Text>
             <Text>Last Inspection: {item.lastInspection}</Text>
@@ -162,16 +162,16 @@ export default function SiteDetail({ navigation, setClients }) {
 
             {/* UPDATE INSPECTION */}
             <TouchableOpacity
-              style={styles.button}
+              style={styles.siteAddButton}
               onPress={() => handleUpdateInspection(item)}
             >
-              <Text style={styles.buttonText}>Update Inspection</Text>
+              <Text style={styles.siteAddButtonText}>Update Inspection</Text>
             </TouchableOpacity>
 
           
             {/* EDIT */}
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#4d94ff" }]}
+              style={[styles.siteAddButton, { backgroundColor: "#4d94ff" }]}
               onPress={() =>
                 navigation.navigate("EditExtinguisher", {
                   extinguisher: item,
@@ -180,7 +180,7 @@ export default function SiteDetail({ navigation, setClients }) {
                 })
               }
             >
-              <Text style={styles.buttonText}>Edit</Text>
+              <Text style={styles.siteAddButtonText}>Edit</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -189,37 +189,3 @@ export default function SiteDetail({ navigation, setClients }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 5 },
-  subtitle: { fontSize: 16, marginBottom: 10 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 15,
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    elevation: 2,
-  },
-  extinguisherName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  addButton: {
-  backgroundColor: "green",
-  padding: 12,
-  borderRadius: 8,
-  alignItems: "center",
-  marginBottom: 12,
-},
-addButtonText: {
-  color: "#fff",
-  fontWeight: "bold",
-},
-});

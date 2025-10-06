@@ -4,11 +4,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { BASE_URL } from "../config";
+import styles from '../components/styles';
 
 export default function EditExtinguisher() {
   const route = useRoute();
@@ -96,62 +96,35 @@ export default function EditExtinguisher() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{extinguisher.type}</Text>
+    <View style={styles.editExtContainer}>
+      <Text style={styles.editExtTitle}>{extinguisher.type}</Text>
 
-      <Text style={styles.label}>Location</Text>
+      <Text style={styles.editExtLabel}>Location</Text>
       <TextInput
-        style={styles.input}
+        style={styles.editExtInput}
         value={location}
         onChangeText={setLocation}
       />
 
-      <Text style={styles.label}>Notes</Text>
+      <Text style={styles.editExtLabel}>Notes</Text>
       <TextInput
-        style={styles.input}
+        style={styles.editExtInput}
         value={notes}
         onChangeText={setNotes}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleUpdateInspection}>
-        <Text style={styles.buttonText}>Update Inspection Date</Text>
+      <TouchableOpacity style={styles.editExtButton} onPress={handleUpdateInspection}>
+        <Text style={styles.editExtButtonText}>Update Inspection Date</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Save Changes</Text>
+      <TouchableOpacity style={styles.editExtButton} onPress={handleSave}>
+        <Text style={styles.editExtButtonText}>Save Changes</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.buttonText}>Delete Extinguisher</Text>
+      <TouchableOpacity style={styles.editExtDeleteButton} onPress={handleDelete}>
+        <Text style={styles.editExtButtonText}>Delete Extinguisher</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 20 },
-  label: { marginBottom: 5 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: "#fff",
-  },
-  button: {
-    backgroundColor: "green",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  deleteButton: {
-    backgroundColor: "red",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: { color: "#fff", fontWeight: "bold" },
-});
