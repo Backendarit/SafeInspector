@@ -30,6 +30,7 @@ let clients = [
           name: "Maija Menninkäinen",
           phone: "040 123 456",
         },
+        inspector: "Tarkastaja1",
         extinguishers: [
           {
             id: "1",
@@ -40,7 +41,7 @@ let clients = [
             intervalYears: 2,
             nextInspection: "2025-09-01",
             serviceDue: 2028,
-            status: "OK",
+            status: "Late",
             notes: "",
           },
           {
@@ -65,6 +66,7 @@ let clients = [
           name: "Tarja Menninkäinen",
           phone: "040 123 455",
         },
+        inspector: "Tarkastaja1",
         extinguishers: [
           {
             id: "1",
@@ -75,7 +77,7 @@ let clients = [
             intervalYears: 2,
             nextInspection: "2025-09-02",
             serviceDue: 2028,
-            status: "OK",
+            status: "Late",
             notes: "",
           },
           {
@@ -107,6 +109,7 @@ let clients = [
           name: "Nelli Matula",
           phone: "040 123 454",
         },
+        inspector: "Tarkastaja1",
         extinguishers: [
           {
             id: "1",
@@ -117,7 +120,7 @@ let clients = [
             intervalYears: 2,
             nextInspection: "2025-10-02",
             serviceDue: 2029,
-            status: "OK",
+            status: "Inspection this month",
             notes: "",
           },
         ],
@@ -130,6 +133,7 @@ let clients = [
           name: "Olivia Terttu",
           phone: "040 123 453",
         },
+        inspector: "Tarkastaja1",
         extinguishers: [
           {
             id: "1",
@@ -147,12 +151,12 @@ let clients = [
             id: "2",
             type: "Tamrex 6kg ABC",
             location: "Staircase B",
-            manufactureYear: 2016,
+            manufactureYear: 2019,
             lastInspection: "2025-06-02",
             intervalYears: 2,
             nextInspection: "2025-09-01",
-            serviceDue: 2026,
-            status: "Needs service",
+            serviceDue: 2029,
+            status: "Late",
             notes: "Replace in 05/2026",
           },
         ],
@@ -265,26 +269,46 @@ app.post("/api/clients/:clientId/sites/:siteId/extinguishers", (req, res) => {
   if (!site) return res.status(404).json({ error: "Site not found" });
 
   const extinguisher = req.body;
-  extinguisher.id = String(site.extinguishers.length + 1); // auto-generate ID
+
+  if (!extinguisher.type || !extinguisher.manufactureYear) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  extinguisher.id = String(site.extinguishers.length + 1);
+  //Add today as last inspected if it is empty
+  if (!extinguisher.lastInspection) {
+  extinguisher.lastInspection = new Date().toISOString().split("T")[0];
+  }
+
+  // Count Service Due and Next Inspection
+  const serviceDue = extinguisher.manufactureYear + 10;
+  let nextInspection = null;
+
+  if (extinguisher.lastInspection) {
+    const next = new Date(extinguisher.lastInspection);
+    next.setFullYear(
+      next.getFullYear() + parseInt(extinguisher.intervalYears || 2)
+    );
+    nextInspection = next.toISOString().split("T")[0];
+  }
+
+  //Estä lisäys, jos seuraava tarkastus ylittää serviceDue
+  if (nextInspection && parseInt(nextInspection.slice(0, 4)) > serviceDue) {
+    return res.status(400).json({
+      error: "Inspection blocked",
+      message: `Cannot add extinguisher. Next inspection (${nextInspection}) exceeds service due (${serviceDue}).`,
+    });
+  }
+
+  // Lisää laskettu data
+  extinguisher.nextInspection = nextInspection;
+  extinguisher.serviceDue = serviceDue;
+
   site.extinguishers.push(extinguisher);
 
   res.status(201).json({ message: "Extinguisher added", extinguisher });
 });
 
-// Update extinguisher
-app.put("/api/clients/:clientId/sites/:siteId/extinguishers/:extId", (req, res) => {
-  const client = clients.find((c) => c.id === req.params.clientId);
-  if (!client) return res.status(404).json({ error: "Client not found" });
-
-  const site = client.sites.find((s) => s.id === req.params.siteId);
-  if (!site) return res.status(404).json({ error: "Site not found" });
-
-  const extinguisher = site.extinguishers.find((e) => e.id === req.params.extId);
-  if (!extinguisher) return res.status(404).json({ error: "Extinguisher not found" });
-
-  Object.assign(extinguisher, req.body);
-  res.json({ message: "Extinguisher updated", extinguisher });
-});
 
 
 // Delete extinguisher
@@ -302,8 +326,7 @@ app.delete("/api/clients/:clientId/sites/:siteId/extinguishers/:extId", (req, re
   res.status(204).send();
 });
 
-// --Inspection Update
-// Quick endpoint to update extinguisher inspection date to today
+// --Inspection Update (with service due check)
 app.put("/api/clients/:clientId/sites/:siteId/extinguishers/:extId/inspect", (req, res) => {
   const client = clients.find((c) => c.id === req.params.clientId);
   if (!client) return res.status(404).json({ error: "Client not found" });
@@ -314,16 +337,31 @@ app.put("/api/clients/:clientId/sites/:siteId/extinguishers/:extId/inspect", (re
   const extinguisher = site.extinguishers.find((e) => e.id === req.params.extId);
   if (!extinguisher) return res.status(404).json({ error: "Extinguisher not found" });
 
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0]; 
+  const currentYear = new Date().getFullYear();
+
+  const serviceDue = extinguisher.manufactureYear + 10;
+  const nextInspectionYear = currentYear + extinguisher.intervalYears;
+
+  // Estä lisäys, jos seuraava tarkastus ylittää huoltopäivän
+  if (nextInspectionYear > serviceDue) {
+    return res.status(400).json({
+      error: "Inspection blocked",
+      message: `Cannot inspect extinguisher. Service due in ${serviceDue}.`,
+    });
+  }
+
+  // Update Next Inspection
   extinguisher.lastInspection = today;
 
   const next = new Date(today);
   next.setFullYear(next.getFullYear() + extinguisher.intervalYears);
   extinguisher.nextInspection = next.toISOString().split("T")[0];
-  extinguisher.serviceDue = extinguisher.manufactureYear + 10;
+  extinguisher.serviceDue = serviceDue;
 
   res.json({ message: "Inspection updated", extinguisher });
 });
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

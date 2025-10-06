@@ -1,4 +1,3 @@
-// screen/AddExtinguisher.js
 import React, { useState } from "react";
 import {
   View,
@@ -7,19 +6,22 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker"; 
 import { BASE_URL } from "../config";
-import styles from '../components/styles';
+import styles from "../components/styles";
 
 export default function AddExtinguisher({ route, navigation }) {
   const { clientId, siteId } = route.params;
 
+  // Input fields
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
   const [manufactureYear, setManufactureYear] = useState("");
   const [lastInspection, setLastInspection] = useState("");
-  const [intervalYears, setIntervalYears] = useState("2"); // default 2 years
+  const [intervalYears, setIntervalYears] = useState(2); // default 2 years
   const [notes, setNotes] = useState("");
 
+  // Save new Extinguisher
   const handleSave = async () => {
     if (!type.trim() || !location.trim() || !manufactureYear) {
       Alert.alert("Error", "Please fill required fields (type, location, year).");
@@ -32,9 +34,7 @@ export default function AddExtinguisher({ route, navigation }) {
       location,
       manufactureYear: parseInt(manufactureYear, 10),
       lastInspection,
-      intervalYears: parseInt(intervalYears, 10),
-      nextInspection: "", // backend voi laskea tai jätetään tyhjäksi
-      serviceDue: "", // backend voi laskea tai jätetään tyhjäksi
+      intervalYears,
       status: "OK",
       notes,
     };
@@ -49,9 +49,19 @@ export default function AddExtinguisher({ route, navigation }) {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+      const data = await response.json();
+
+      // Jos backend esti lisäämisen
+      if (!response.ok && data.error === "Inspection blocked") {
+        Alert.alert(
+          "Cannot Add Extinguisher",
+          data.message,
+          [{ text: "OK", style: "default" }]
+        );
+        return;
       }
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       Alert.alert("Saved!", "New extinguisher added successfully.");
       navigation.goBack();
@@ -61,12 +71,14 @@ export default function AddExtinguisher({ route, navigation }) {
     }
   };
 
+  // --- INPUTS ---
+
   return (
     <View style={styles.addExtContainer}>
       <Text style={styles.addExtTitle}>Add Extinguisher</Text>
 
       <TextInput
-        style={styles.addExtinput}
+        style={styles.addExtInput}
         placeholder="Type (e.g. Tamrex 6kg ABC)"
         value={type}
         onChangeText={setType}
@@ -90,16 +102,20 @@ export default function AddExtinguisher({ route, navigation }) {
         value={lastInspection}
         onChangeText={setLastInspection}
       />
+
+      <Text style={styles.addExtlabel}>Inspection Interval (years)</Text>
+      <Picker
+        selectedValue={intervalYears}
+        onValueChange={(value) => setIntervalYears(value)}
+        style={styles.addExtInput}
+      >
+        <Picker.Item label="1 year" value={1} />
+        <Picker.Item label="2 years" value={2} />
+      </Picker>
+
       <TextInput
         style={styles.addExtInput}
-        placeholder="Interval Years"
-        value={intervalYears}
-        onChangeText={setIntervalYears}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.addExtInput}
-        placeholder="Notes"
+        placeholder="Notes (optional)"
         value={notes}
         onChangeText={setNotes}
       />
@@ -110,4 +126,3 @@ export default function AddExtinguisher({ route, navigation }) {
     </View>
   );
 }
-

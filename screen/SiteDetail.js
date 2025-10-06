@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,55 +7,67 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../config";
 import styles from '../components/styles';
 
-// Päivittää tarkastustiedot sammuttimelle
-function updateInspection(extinguisher) {
-  const today = new Date();
-  const lastInspection = today.toISOString().split("T")[0];
-
-  // Seuraava tarkastus = nykyinen päivä + intervalYears
-  const nextInspectionDate = new Date(today);
-  nextInspectionDate.setFullYear(today.getFullYear() + extinguisher.intervalYears);
-  const nextInspection = nextInspectionDate.toISOString().split("T")[0];
-
-  // Huolto erääntyy = valmistusvuosi + 10
-  const serviceDue = extinguisher.manufactureYear + 10;
-
-  return {
-    ...extinguisher,
-    lastInspection,
-    nextInspection,
-    serviceDue,
-  };
-}
 
 export default function SiteDetail({ navigation, setClients }) {
   const route = useRoute();
-  const { site, client } = route.params; // näistä tulee navigoinnin mukana
+  const { site, client } = route.params;
+  const [currentSite, setCurrentSite] = useState(site);
   const [loading, setLoading] = useState(false);
 
-  // Päivitä tarkastus backendissä ja tilassa
+  // Retrieves the latest information
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUpdatedSite = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(`${BASE_URL}/api/clients/${client.id}`);
+          if (!response.ok) throw new Error("Failed to fetch client");
+
+          const updatedClient = await response.json();
+          const updatedSite = updatedClient.sites.find((s) => s.id === site.id);
+          if (updatedSite) setCurrentSite(updatedSite);
+        } catch (err) {
+          console.error("Error refreshing site:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchUpdatedSite();
+    }, [client.id, site.id])
+  );
+
+  //  Update Inspection 
   const handleUpdateInspection = async (extinguisher) => {
-    const updatedExt = updateInspection(extinguisher);
     setLoading(true);
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedExt),
-        }
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
+        { method: "PUT" }
       );
+
+      const data = await response.json();
+          // If Service Due is before next Inspection
+      if (!response.ok && data.error === "Inspection blocked") {
+        Alert.alert(
+          "Service Due Approaching",
+          data.message,
+          [{ text: "OK", style: "default" }]
+        );
+        return; // do not update
+      }
+
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
-      // Päivitetään local state
-      setClients((prevClients) =>
-        prevClients.map((c) =>
+      // Update localstate
+      setClients((prev) =>
+        prev.map((c) =>
           c.id === client.id
             ? {
                 ...c,
@@ -64,7 +76,7 @@ export default function SiteDetail({ navigation, setClients }) {
                     ? {
                         ...s,
                         extinguishers: s.extinguishers.map((ext) =>
-                          ext.id === extinguisher.id ? updatedExt : ext
+                          ext.id === extinguisher.id ? data.extinguisher : ext
                         ),
                       }
                     : s
@@ -73,115 +85,94 @@ export default function SiteDetail({ navigation, setClients }) {
             : c
         )
       );
+
       Alert.alert("Success", "Inspection updated successfully.");
     } catch (err) {
-      console.error(err);
+      console.error("Error updating inspection:", err);
       Alert.alert("Error", "Failed to update inspection.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Poista sammutin backendistä ja tilasta
-  const handleDeleteExtinguisher = async (extinguisherId) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisherId}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-
-      // Päivitetään local state
-      setClients((prevClients) =>
-        prevClients.map((c) =>
-          c.id === client.id
-            ? {
-                ...c,
-                sites: c.sites.map((s) =>
-                  s.id === site.id
-                    ? {
-                        ...s,
-                        extinguishers: s.extinguishers.filter(
-                          (ext) => ext.id !== extinguisherId
-                        ),
-                      }
-                    : s
-                ),
-              }
-            : c
-        )
-      );
-      Alert.alert("Deleted", "Extinguisher deleted successfully.");
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Failed to delete extinguisher.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Renderöi näkymä
+  // Käyttöliittymä
   return (
     <View style={styles.siteContainer}>
-      <Text style={styles.siteTitle}>{site.name}</Text>
-      <Text style={styles.siteSubtitle}>Client: {client.name}</Text>
-      <Text>Address: {site.address}</Text>
-      <Text>Contact: {site.contact.name}</Text>
-      <Text>Phone: {site.contact.phone}</Text>
+      {/* --- Site Header --- */}
+      <View style={styles.siteCard}>
+        <View style={styles.siteHeaderRow}>
+          <Text style={styles.siteTitle}>{currentSite.name}</Text>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() =>
+              navigation.navigate("EditSite", {
+                ssite: currentSite,
+                client,
+              })
+            }
+          >
+            <Ionicons name="pencil" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <Text>Address: {currentSite.address}</Text>
+        <Text>Contact: {currentSite.contact.name}</Text>
+        <Text>Phone: {currentSite.contact.phone}</Text>
+      </View>
+      {/* --- Extinguishers Header with Add Button --- */}
+      <View style={styles.siteExtHeader}> 
+        <Text style={styles.siteSectionTitle}>Extinguishers</Text>
+        <TouchableOpacity
+          style={styles.addButton} 
+          onPress={() =>
+            navigation.navigate("AddExtinguisher", {
+              clientId: client.id,
+              siteId: currentSite.id,
+            })
+          }
+        >
+          <Ionicons name="add" size={26} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      {/* Add New Extinguisher */}
-      <TouchableOpacity
-        style={styles.siteAddButton}
-        onPress={() =>
-          navigation.navigate("AddExtinguisher", {
-            clientId: client.id,
-            siteId: site.id,
-          })
-        }
-      >
-        <Text style={styles.siteAddButtonText}>+ Add Extinguisher</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.siteSectionTitle}>Extinguishers</Text>
       {loading && <ActivityIndicator size="large" color="green" />}
       <FlatList
-        data={site.extinguishers}
+        data={currentSite.extinguishers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.siteCard}>
-            <Text style={styles.siteExtinguisherName}>{item.type}</Text>
+            <Text style={styles.siteExtinguisherName}>{item.id} {item.type}</Text>
             <Text>Location: {item.location}</Text>
             <Text>Manufacture Year: {item.manufactureYear}</Text>
             <Text>Last Inspection: {item.lastInspection}</Text>
-            <Text>Inspection Interval: {item.intervalYears} years</Text>
+            <Text>Interval: {item.intervalYears} years</Text>
             <Text>Next Inspection: {item.nextInspection}</Text>
             <Text>Service Due: {item.serviceDue}</Text>
             <Text>Status: {item.status}</Text>
             {item.notes ? <Text>Notes: {item.notes}</Text> : null}
 
-            {/* UPDATE INSPECTION */}
-            <TouchableOpacity
-              style={styles.siteAddButton}
-              onPress={() => handleUpdateInspection(item)}
-            >
-              <Text style={styles.siteAddButtonText}>Update Inspection</Text>
-            </TouchableOpacity>
+            {/* --- Button Row --- */}
+            <View style={styles.siteButtonRow}>
+              <TouchableOpacity
+                style={styles.siteSmallButton}
+                onPress={() => handleUpdateInspection(item)}
+              >
+              <Text style={styles.siteButtonText}>Inspected today</Text>
+              </TouchableOpacity>
 
-          
-            {/* EDIT */}
-            <TouchableOpacity
-              style={[styles.siteAddButton, { backgroundColor: "#4d94ff" }]}
-              onPress={() =>
-                navigation.navigate("EditExtinguisher", {
-                  extinguisher: item,
-                  site,
-                  client,
-                })
-              }
-            >
-              <Text style={styles.siteAddButtonText}>Edit</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() =>
+                  navigation.navigate("EditExtinguisher", {
+                    extinguisher: item,
+                    site,
+                    client,
+                  })
+                }
+              >
+              <Ionicons name="pencil" size={22} color="#fff" />
+              </TouchableOpacity>
+
+            </View>
           </View>
         )}
       />

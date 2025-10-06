@@ -1,6 +1,22 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
+// --BASICS--
+
+
+//  --BUTTONS-- 
+    editButton: {
+        backgroundColor: "#3F8ECE",
+        padding: 8,
+        borderRadius: 6,
+    },
+    addButton: {
+        backgroundColor: "#66B166",
+        borderRadius: 25,
+        padding: 8,
+        elevation: 3,
+    },
+
     //Home.js-styles
     homeContainer: {
         flex: 1,
@@ -48,19 +64,27 @@ const styles = StyleSheet.create({
     siteContainer: { 
         flex: 1, 
         padding: 15, 
-        backgroundColor: "#f9f9f9" 
+        backgroundColor: "#F0F3F5" 
+    },
+    siteHeaderRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
     siteTitle: { 
-        fontSize: 22, 
+        fontSize: 24, 
         fontWeight: "bold", 
         marginBottom: 5 
     },
-    siteSubtitle: { 
-        fontSize: 16, 
-        marginBottom: 10 
+    siteExtHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 15,
+        marginBottom: 8,
     },
     siteSectionTitle: {
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: "600",
         marginTop: 15,
         marginBottom: 8,
@@ -77,17 +101,24 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 4,
     },
-    siteAddButton: {
-        backgroundColor: "green",
-        padding: 12,
-        borderRadius: 8,
-        alignItems: "center",
-        marginBottom: 12,
+    siteButtonRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 10,
     },
-    siteAddButtonText: {
+    siteSmallButton: {
+        backgroundColor: "#176817",
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 6,
+        marginRight: 10,
+        alignItems: "center",
+    },
+    siteButtonText: {
         color: "#fff",
         fontWeight: "bold",
     },
+
 
     //ClientList.js-styles
     clientContainer: {
@@ -232,6 +263,11 @@ const styles = StyleSheet.create({
         fontSize: 16, 
         fontWeight: "bold" 
     },
+    addExtlabel: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: "#333",
+  },
 
     //EditExtinguisher.js-styles
     editExtContainer: { 
