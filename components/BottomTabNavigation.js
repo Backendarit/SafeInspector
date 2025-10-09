@@ -1,0 +1,74 @@
+import React from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+
+import HomeStack from './HomeStack';
+import WorkQueueStack from './WorkQueueStack';
+import MapsStack from './MapsStack';
+import ClientsStack from './ClientsStack';
+
+import { Ionicons } from '@expo/vector-icons';
+
+const Tab = createBottomTabNavigator();
+
+export default function BottomTabNavigation({ clients, setClients }) {
+    return (
+       <Tab.Navigator
+            screenOptions={{
+                tabBarActiveTintColor: '#176817',
+                tabBarInactiveTintColor: '#66B166',
+            }}
+        >
+        <Tab.Screen name="Home" component={HomeStack} 
+            options={{ tabBarIcon: ({ color, size }) => (
+                <Ionicons name='home-outline' size={size} color={color} />
+                ),
+            }}
+        />
+
+        <Tab.Screen name="WorkQueue" 
+            options={{ tabBarIcon: ({ color, size }) => (
+                <Ionicons name='checkmark-circle-outline' size={size} color={color}/>
+                ),
+            }}
+        >
+            {(props) => (
+                <ClientsStack 
+                    {...props}
+                    clients={clients}
+                    setClients={setClients}
+                />
+            )}    
+        </Tab.Screen>
+        
+        <Tab.Screen name="Maps" 
+            options={{ tabBarIcon: ({ color, size }) => (
+                <Ionicons name='map-outline' size={size} color={color} />
+                ),
+            }}
+        >
+            {(props) => (
+                <ClientsStack 
+                    {...props}
+                    clients={clients}
+                    setClients={setClients}
+                />
+            )}
+        </Tab.Screen>
+
+        <Tab.Screen name="Clients" 
+            options={{ tabBarIcon: ({ color, size }) => (
+                <Ionicons name='people-outline' size={size} color={color} />
+                ),
+            }}
+        >
+            {(props) => (
+                <ClientsStack 
+                    {...props}
+                    clients={clients}
+                    setClients={setClients}
+                />
+            )}
+        </Tab.Screen>
+       </Tab.Navigator>
+    );
+}

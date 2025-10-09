@@ -91,7 +91,7 @@ export default function ClientList() {
       {/* Add CLient */}
       <TouchableOpacity
         style={styles.clientAddButton}
-        onPress={() => navigation.navigate("AddClient")}
+        onPress={() => navigation.navigate("AddClientScreen")}
       >
         <Ionicons name="add-circle" size={28} color="green" />
       </TouchableOpacity>
@@ -118,7 +118,7 @@ export default function ClientList() {
                     key={site.id}
                     style={styles.clientSiteCard}
                     onPress={() =>
-                      navigation.navigate("SiteDetail", { site, client: item })
+                      navigation.navigate("SiteDetailScreen", { site, client: item })
                     }
                   >
                     <Text style={styles.clientSiteName}>• {site.name}</Text>
