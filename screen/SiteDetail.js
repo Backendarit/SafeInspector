@@ -105,7 +105,7 @@ export default function SiteDetail({ navigation, setClients }) {
           <TouchableOpacity
             style={styles.editButton}
             onPress={() =>
-              navigation.navigate("EditSite", {
+              navigation.navigate("SiteUpdateScreen", {
                 ssite: currentSite,
                 client,
               })
@@ -124,7 +124,7 @@ export default function SiteDetail({ navigation, setClients }) {
         <TouchableOpacity
           style={styles.addButton} 
           onPress={() =>
-            navigation.navigate("AddExtinguisher", {
+            navigation.navigate("AddExtinguisherScreen", {
               clientId: client.id,
               siteId: currentSite.id,
             })
@@ -162,7 +162,7 @@ export default function SiteDetail({ navigation, setClients }) {
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() =>
-                  navigation.navigate("EditExtinguisher", {
+                  navigation.navigate("EditExtinguisherScreen", {
                     extinguisher: item,
                     site,
                     client,
