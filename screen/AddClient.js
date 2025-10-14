@@ -14,67 +14,96 @@ import styles from '../components/styles';
 export default function AddClient({ navigation, clients = [], setClients }) {
   const [selectedClient, setSelectedClient] = useState("new");
   const [clientName, setClientName] = useState("");
+  const [businessId, setBusinessId] = useState("");
   const [siteName, setSiteName] = useState("");
   const [address, setAddress] = useState("");
   const [contact, setContact] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false); // load POST
 
-  const handleSave = async () => {
-    if (selectedClient === "new" && clientName.trim() === "") {
-      Alert.alert("Error", "Please enter a client name.");
-      return;
-    }
-    if (siteName.trim() === "") {
-      Alert.alert("Error", "Please enter a site name.");
-      return;
-    }
+const handleSave = async () => {
+  if (selectedClient === "new" && clientName.trim() === "") {
+    Alert.alert("Error", "Please enter a client name.");
+    return;
+  }
+  if (siteName.trim() === "") {
+    Alert.alert("Error", "Please enter a site name.");
+    return;
+  }
+
+  setLoading(true);
 
 
     // New Client
-    const newClient = {
-      name: clientName,
-      businessId: "",
-      sites: [
-        {
-          id: Date.now().toString() + "-site",
-          name: siteName,
-          address,
-          contact: { name: contact, phone }, // huom: backend odottaa objektia
-          extinguishers: [],
-        },
-      ],
-    };
+  try {
+    let response;
+    if (selectedClient === "new") {
 
-    setLoading(true);
-
+      const newClient = {
+        name: clientName,
+        businessId: "",
+        sites: [
+          {
+            id: Date.now().toString() + "-site",
+            name: siteName,
+            address,
+            contact: { name: contact, phone }, 
+            extinguishers: [],
+          },
+        ],
+      };
 
     // POST to Azure
-    try {
-      const response = await fetch(`${BASE_URL}/api/clients`, {
+      response = await fetch(`${BASE_URL}/api/clients`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newClient),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+    } else {
+    // New Site to old Client
+      const newSite = {
+        name: siteName,
+        address,
+        contact: { name: contact, phone },
+        extinguishers: [],
+      };
 
-      const savedClient = await response.json();
-
-      // Show the new client on client list
-      setClients((prev) => [...prev, savedClient.client]);
-
-      Alert.alert("Saved!", "Client was added successfully.");
-      navigation.goBack();
-    } catch (err) {
-      console.error("Error saving client:", err);
-      Alert.alert("Error", "Failed to save client. Please try again later.");
-    } finally {
-      setLoading(false);
+      response = await fetch(`${BASE_URL}/api/clients/${selectedClient}/sites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSite),
+      });
     }
-  };
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Show new client on clientlist
+    if (data.client) {
+      setClients((prev) => [...prev, data.client]); 
+    } else if (data.site) {
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === selectedClient
+            ? { ...c, sites: [...c.sites, data.site] }
+            : c
+        )
+      ); 
+    }
+
+    Alert.alert("Success", "Data saved successfully!");
+    navigation.goBack();
+  } catch (err) {
+    console.error("Error saving client/site:", err);
+    Alert.alert("Error", "Failed to save data. Please try again later.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -102,6 +131,13 @@ export default function AddClient({ navigation, clients = [], setClients }) {
             value={clientName}
             onChangeText={setClientName}
             placeholder="e.g. Sale-R Oy"
+          />
+          <Text style={styles.label}>Business ID</Text>
+          <TextInput
+            style={styles.input}
+            value={businessId}
+            onChangeText={setBusinessId}
+            placeholder="e.g. 1234567-8"
           />
         </>
       )}

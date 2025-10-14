@@ -19,6 +19,7 @@ export default function ClientsStack({ clients, setClients }) {
                 <ClientList 
                     {...props}
                     clients={clients}
+                    setClients={setClients}
                 />
             )}
         </Stack.Screen>
