@@ -48,8 +48,10 @@ export default function SiteDetail({ navigation, setClients }) {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
-        { method: "PUT" }
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,{
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inspectToday: true })}
       );
 
       const data = await response.json();
