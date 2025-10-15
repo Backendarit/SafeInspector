@@ -30,7 +30,6 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       return;
     }
 
-
     // New Client
     const newClient = {
       name: clientName,
@@ -48,7 +47,6 @@ export default function AddClient({ navigation, clients = [], setClients }) {
 
     setLoading(true);
 
-
     // POST to Azure
     try {
       const response = await fetch(`${BASE_URL}/api/clients`, {
@@ -65,6 +63,14 @@ export default function AddClient({ navigation, clients = [], setClients }) {
 
       // Show the new client on client list
       setClients((prev) => [...prev, savedClient.client]);
+
+      // Save to local SQLite for offline reading
+      try {
+        const { addClient } = await import('../sqlconnection/db');
+        await addClient(savedClient.client);
+      } catch (e) {
+        console.log('SQLite addClient failed', e);
+      }
 
       Alert.alert("Saved!", "Client was added successfully.");
       navigation.goBack();
@@ -151,4 +157,3 @@ export default function AddClient({ navigation, clients = [], setClients }) {
     </View>
   );
 }
-
