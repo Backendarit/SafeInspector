@@ -23,16 +23,17 @@ export default function SiteDetail({ navigation, setClients }) {
   useFocusEffect(
     useCallback(() => {
       const fetchUpdatedSite = async () => {
+        setLoading(true);
         try {
-          setLoading(true);
           const response = await fetch(`${BASE_URL}/api/clients/${client.id}`);
-          if (!response.ok) throw new Error("Failed to fetch client");
-
-          const updatedClient = await response.json();
-          const updatedSite = updatedClient.sites.find((s) => s.id === site.id);
-          if (updatedSite) setCurrentSite(updatedSite);
-        } catch (err) {
-          console.error("Error refreshing site:", err);
+          if (response.ok) {
+            const updatedClient = await response.json();
+            const updatedSite = updatedClient.sites.find((s) => s.id === site.id);
+            if (updatedSite) setCurrentSite(updatedSite);
+          }
+          // if not ok, just skip and keep local data
+        } catch (_) {
+          // silent: ignore network errors, keep local data
         } finally {
           setLoading(false);
         }

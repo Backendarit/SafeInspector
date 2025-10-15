@@ -21,89 +21,113 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false); // load POST
 
-const handleSave = async () => {
-  if (selectedClient === "new" && clientName.trim() === "") {
-    Alert.alert("Error", "Please enter a client name.");
-    return;
-  }
-  if (siteName.trim() === "") {
-    Alert.alert("Error", "Please enter a site name.");
-    return;
-  }
-
-  setLoading(true);
-
-
-    // New Client
-  try {
-    let response;
-    if (selectedClient === "new") {
-
-      const newClient = {
-        name: clientName,
-        businessId: "",
-        sites: [
-          {
-            id: Date.now().toString() + "-site",
-            name: siteName,
-            address,
-            contact: { name: contact, phone }, 
-            extinguishers: [],
-          },
-        ],
-      };
-
-    // POST to Azure
-      response = await fetch(`${BASE_URL}/api/clients`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newClient),
-      });
-
-    } else {
-    // New Site to old Client
-      const newSite = {
-        name: siteName,
-        address,
-        contact: { name: contact, phone },
-        extinguishers: [],
-      };
-
-      response = await fetch(`${BASE_URL}/api/clients/${selectedClient}/sites`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSite),
-      });
+  const handleSave = async () => {
+    if (selectedClient === "new" && clientName.trim() === "") {
+      Alert.alert("Error", "Please enter a client name.");
+      return;
+    }
+    if (siteName.trim() === "") {
+      Alert.alert("Error", "Please enter a site name.");
+      return;
     }
 
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
+    setLoading(true);
+
+    try {
+      let response;
+
+      if (selectedClient === "new") {
+        // New Client
+        const newClient = {
+          name: clientName,
+          businessId, // use form value
+          sites: [
+            {
+              id: Date.now().toString() + "-site",
+              name: siteName,
+              address,
+              contact: { name: contact, phone },
+              extinguishers: [],
+            },
+          ],
+        };
+
+        // POST to Azure
+        response = await fetch(`${BASE_URL}/api/clients`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newClient),
+        });
+      } else {
+        // New Site to old Client
+        const newSite = {
+          name: siteName,
+          address,
+          contact: { name: contact, phone },
+          extinguishers: [],
+        };
+
+        response = await fetch(`${BASE_URL}/api/clients/${selectedClient}/sites`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newSite),
+        });
+      }
+
+      if (!response.ok) {
+        const txt = await response.text().catch(() => "");
+        throw new Error(`Server error: ${response.status} ${txt}`);
+      }
+
+      const data = await response.json();
+
+      // Show new client on clientlist
+      if (data.client) {
+        setClients((prev) => [...prev, data.client]);
+
+        // Save to local SQLite
+        try {
+          const { addClient } = await import('../sqlconnection/db');
+          await addClient(data.client);
+        } catch (e) {
+          console.log('SQLite addClient failed', e);
+        }
+
+      } else if (data.site) {
+        // New site added to existing client
+        setClients((prev) =>
+          prev.map((c) =>
+            String(c.id) === String(selectedClient)
+              ? { ...c, sites: [...c.sites, data.site] }
+              : c
+          )
+        );
+
+        // Find updated client and save to SQLite
+        const updatedClient = clients.find((c) => String(c.id) === String(selectedClient));
+        if (updatedClient) {
+          const newClientData = {
+            ...updatedClient,
+            sites: [...updatedClient.sites, data.site],
+          };
+          try {
+            const { addClient } = await import('../sqlconnection/db');
+            await addClient(newClientData);
+          } catch (e) {
+            console.log('SQLite addClient failed', e);
+          }
+        }
+      }
+
+      Alert.alert("Success", "Data saved successfully!");
+      navigation.goBack();
+    } catch (err) {
+      console.error("Error saving client/site:", err);
+      Alert.alert("Error", "Failed to save data. Please try again later.");
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-
-    // Show new client on clientlist
-    if (data.client) {
-      setClients((prev) => [...prev, data.client]); 
-    } else if (data.site) {
-      setClients((prev) =>
-        prev.map((c) =>
-          c.id === selectedClient
-            ? { ...c, sites: [...c.sites, data.site] }
-            : c
-        )
-      ); 
-    }
-
-    Alert.alert("Success", "Data saved successfully!");
-    navigation.goBack();
-  } catch (err) {
-    console.error("Error saving client/site:", err);
-    Alert.alert("Error", "Failed to save data. Please try again later.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -187,4 +211,3 @@ const handleSave = async () => {
     </View>
   );
 }
-
