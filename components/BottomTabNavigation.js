@@ -40,14 +40,17 @@ export default function BottomTabNavigation({ clients, setClients }) {
             )}    
         </Tab.Screen>
         
-        <Tab.Screen name="Maps" 
-            options={{ tabBarIcon: ({ color, size }) => (
-                <Ionicons name='map-outline' size={size} color={color} />
+            <Tab.Screen
+            name="Maps"
+            options={{
+                 headerShown: false,
+                tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="map-outline" size={size} color={color} />
                 ),
             }}
         >
             {(props) => (
-                <ClientsStack 
+                <MapsStack
                     {...props}
                     clients={clients}
                     setClients={setClients}

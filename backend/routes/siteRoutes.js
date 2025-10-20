@@ -23,8 +23,7 @@ router.post("/:clientId/sites", (req, res) => {
   const client = clients.find((c) => c.id === clientId);
   if (!client) return res.status(404).json({ error: "Client not found" });
 
-  const { name, address, contact } = req.body;
-
+  const { name, address, contact, coords } = req.body;
   if (!name || !address) {
     return res.status(400).json({ error: "Name and address are required" });
   }
@@ -35,6 +34,7 @@ router.post("/:clientId/sites", (req, res) => {
     address,
     contact: contact || { name: "", phone: "" },
     extinguishers: [],
+    coords: coords || null,
   };
 
   client.sites.push(newSite);
@@ -50,16 +50,20 @@ router.put("/:clientId/sites/:siteId", (req, res) => {
   const site = client.sites.find((s) => s.id === siteId);
   if (!site) return res.status(404).json({ error: "Site not found" });
 
-  const { name, address, contact } = req.body;
+  const { name, address, contact, coords } = req.body;
 
   if (name) site.name = name;
   if (address) site.address = address;
   if (contact) {
     site.contact = { ...site.contact, ...contact }; // merge new contact info
   }
+  if (coords) {
+    site.coords = coords; // save updated coords
+  }
 
   res.json({ message: "Site updated", site });
 });
+
 
 // DELETE site
 router.delete("/:clientId/sites/:siteId", (req, res) => {
