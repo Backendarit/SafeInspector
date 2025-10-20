@@ -20,8 +20,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.28203,
-          longitude: 23.43363,
+          latitude: 61.47292,
+          longitude: 23.72659,
           },
         extinguishers: [
           {
@@ -60,8 +60,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.29007,
-          longitude: 23.45399,
+          latitude: 61.48381, 
+          longitude: 23.76116,
           },
         extinguishers: [
           {
@@ -107,8 +107,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.30001,
-          longitude: 23.44429,
+          latitude: 61.50009,
+          longitude: 23.74537,
           },
         extinguishers: [
           {
@@ -135,8 +135,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.29567,
-          longitude: 23.44259,
+          latitude: 61.49915,
+          longitude: 23.74018,
           },
         extinguishers: [
           {
@@ -182,8 +182,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.5035,
-          longitude: 	23.7659,
+          latitude: 61.50339,
+          longitude: 	23.76597,
           },
         extinguishers: [
           {
@@ -202,7 +202,7 @@ const clients = [
       },
       {
         id: "2",
-        name: "HK-Market Lapinniemi",
+        name: "K-Market Lapinniemi",
         address: "Käpytie 4",
         contact: {
           name: "Milla Magia",
@@ -210,8 +210,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.30324,
-          longitude: 23.46417,
+          latitude: 61.50905,
+          longitude: 23.77816,
           },
         extinguishers: [
           {
@@ -250,8 +250,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.30019,
-          longitude: 	23.46469,
+          latitude: 61.50061,
+          longitude: 	23.77997,
           },
         extinguishers: [
           {
@@ -278,8 +278,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.50328,
-          longitude: 	23.77846,
+          latitude: 61.50349,
+          longitude: 	23.77842,
           },
         extinguishers: [
           {
@@ -306,8 +306,8 @@ const clients = [
         },
         inspector: "Tarkastaja1",
         coords: {
-          latitude: 61.50004,
-          longitude: 	23.74313,
+          latitude: 61.50001,
+          longitude: 	23.74321,
           },
         extinguishers: [
           {

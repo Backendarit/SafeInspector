@@ -8,8 +8,8 @@ import { BASE_URL } from "../config";
 const DEFAULT_REGION = {
   latitude: 61.4981,
   longitude: 23.7600,
-  latitudeDelta: 0.08,
-  longitudeDelta: 0.08,
+  latitudeDelta: 0.6,
+  longitudeDelta: 0.6,
 };
 
 export default function Maps({ navigation, clients = [] }) {
