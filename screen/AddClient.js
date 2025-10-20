@@ -142,8 +142,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}> 
-      <Text style={styles.title}>Add Client or Site</Text>
+    <ScrollView style={styles.backgroundContainer}> 
 
       <Text style={styles.label}>Select client</Text>
       <Picker

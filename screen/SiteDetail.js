@@ -100,11 +100,11 @@ export default function SiteDetail({ navigation, setClients }) {
 
   // Käyttöliittymä
   return (
-    <View style={styles.siteContainer}>
+    <View style={styles.backgroundContainer}>
       {/* --- Site Header --- */}
-      <View style={styles.siteCard}>
+      <View style={styles.card}>
         <View style={styles.siteHeaderRow}>
-          <Text style={styles.siteTitle}>{currentSite.name}</Text>
+          <Text style={styles.clientName}>{currentSite.name}</Text>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() =>
@@ -117,13 +117,13 @@ export default function SiteDetail({ navigation, setClients }) {
             <Ionicons name="pencil" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text>Address: {currentSite.address}</Text>
-        <Text>Contact: {currentSite.contact.name}</Text>
-        <Text>Phone: {currentSite.contact.phone}</Text>
+        <Text style={styles.textDetails}>Address: {currentSite.address}</Text>
+        <Text style={styles.textDetails}>Contact: {currentSite.contact.name}</Text>
+        <Text style={styles.textDetails}>Phone: {currentSite.contact.phone}</Text>
       </View>
       {/* --- Extinguishers Header with Add Button --- */}
       <View style={styles.siteExtHeader}> 
-        <Text style={styles.siteSectionTitle}>Extinguishers</Text>
+        <Text style={styles.clientName}>Extinguishers</Text>
         <TouchableOpacity
           style={styles.addButton} 
           onPress={() =>
@@ -133,7 +133,7 @@ export default function SiteDetail({ navigation, setClients }) {
             })
           }
         >
-          <Ionicons name="add" size={26} color="#fff" />
+          <Ionicons name="add-circle" size={40} color="#66B166" />
         </TouchableOpacity>
       </View>
 
@@ -142,7 +142,7 @@ export default function SiteDetail({ navigation, setClients }) {
         data={currentSite.extinguishers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.siteCard}>
+          <View style={styles.card}>
             <Text style={styles.siteExtinguisherName}>{item.id} {item.type}</Text>
             <Text>Location: {item.location}</Text>
             <Text>Manufacture Year: {item.manufactureYear}</Text>
@@ -156,10 +156,10 @@ export default function SiteDetail({ navigation, setClients }) {
             {/* --- Button Row --- */}
             <View style={styles.siteButtonRow}>
               <TouchableOpacity
-                style={styles.siteSmallButton}
+                style={styles.saveButton}
                 onPress={() => handleUpdateInspection(item)}
               >
-              <Text style={styles.siteButtonText}>Inspected today</Text>
+              <Text style={styles.saveText}>Inspected today</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -172,7 +172,7 @@ export default function SiteDetail({ navigation, setClients }) {
                   })
                 }
               >
-              <Ionicons name="pencil" size={22} color="#fff" />
+              <Ionicons name="pencil" size={24} color="#fff" />
               </TouchableOpacity>
 
             </View>

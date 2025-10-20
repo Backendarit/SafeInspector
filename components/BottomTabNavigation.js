@@ -16,6 +16,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             screenOptions={{
                 tabBarActiveTintColor: '#176817',
                 tabBarInactiveTintColor: '#66B166',
+                headerShown: false
             }}
         >
         <Tab.Screen name="Home" component={HomeStack} 

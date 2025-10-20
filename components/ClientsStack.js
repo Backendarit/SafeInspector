@@ -14,7 +14,7 @@ export default function ClientsStack({ clients, setClients }) {
 
   return (
     <Stack.Navigator initialRouteName="ClientListScreen"> 
-        <Stack.Screen name="ClientListScreen" options={{title: "Client List"}}>
+        <Stack.Screen name="ClientListScreen" options={{title: "Clients"}}>
             {(props) => (
                 <ClientList 
                     {...props}
@@ -34,7 +34,7 @@ export default function ClientsStack({ clients, setClients }) {
         </Stack.Screen>
         <Stack.Screen name="AddExtinguisherScreen" options={{title: "Add Extinguisher"}} component={AddExtinguisher} />
         <Stack.Screen name="EditExtinguisherScreen" options={{title: "Edit Extinguisher"}} component={EditExtinguisher} />
-        <Stack.Screen name="SiteDetailScreen" options={{title: "Site Detail"}}>
+        <Stack.Screen name="SiteDetailScreen" options={{title: "Site Details"}}>
             {(props) => (
                 <SiteDetail 
                     {...props}

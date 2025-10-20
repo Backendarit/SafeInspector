@@ -53,10 +53,14 @@ export default function ClientList() {
     fetchClients();
   }, []);
 
-  // Search by name
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Search clients and their sites
+  const filteredClients = clients.filter((client) => {
+    const clientMatch = client.name.toLowerCase().includes(search.toLowerCase());
+    const siteMatch = client.sites?.some((site) =>
+      site.name.toLowerCase().includes(search.toLowerCase())
+    );
+    return clientMatch || siteMatch;
+  });
 
   // Expand Client to Sites
   const toggleExpand = (id) => {
@@ -79,10 +83,10 @@ export default function ClientList() {
   }
 
   return (
-    <View style={styles.clientContainer}>
+    <View style={styles.backgroundContainer}>
       {/* Searchbar */}
       <TextInput
-        style={styles.clientSearch}
+        style={styles.input}
         placeholder="Search clients..."
         value={search}
         onChangeText={setSearch}
@@ -90,10 +94,10 @@ export default function ClientList() {
 
       {/* Add CLient */}
       <TouchableOpacity
-        style={styles.clientAddButton}
+        style={styles.addButton}
         onPress={() => navigation.navigate("AddClientScreen")}
       >
-        <Ionicons name="add-circle" size={28} color="green" />
+        <Ionicons name="add-circle" size={40} color="#66B166" />
       </TouchableOpacity>
 
       {/* Client List */}
@@ -103,7 +107,7 @@ export default function ClientList() {
         refreshing={refreshing}   // Pull-to-refresh 
         onRefresh={onRefresh}     
         renderItem={({ item }) => (
-          <View style={styles.clientCard}>
+          <View style={styles.card}>
             {/* Clients */}
             <TouchableOpacity onPress={() => toggleExpand(item.id)}>
               <Text style={styles.clientName}>{item.name}</Text>
@@ -112,7 +116,7 @@ export default function ClientList() {
 
             {/* Widen to Sites if Client is open */}
             {expandedClientId === item.id && (
-              <View style={styles.clientSitesContainer}>
+              <View>
                 {item.sites.map((site) => (
                   <TouchableOpacity
                     key={site.id}
@@ -121,7 +125,7 @@ export default function ClientList() {
                       navigation.navigate("SiteDetailScreen", { site, client: item })
                     }
                   >
-                    <Text style={styles.clientSiteName}>• {site.name}</Text>
+                    <Text style={styles.siteExtinguisherName}>• {site.name}</Text>
                     <Text style={styles.clientSiteInfo}>
                       {site.extinguishers.length} extinguishers
                     </Text>
