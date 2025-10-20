@@ -130,9 +130,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add Client or Site</Text>
-
+    <View style={styles.backgroundContainer}>
       <Text style={styles.label}>Select client</Text>
       <Picker
         selectedValue={selectedClient}

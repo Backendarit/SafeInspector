@@ -73,32 +73,29 @@ export default function EditExtinguisher() {
 
 
   return (
-    <ScrollView style={styles.editExtContainer}>
-      <Text style={styles.editExtTitle}>Edit Extinguisher</Text>
+    <ScrollView style={styles.backgroundContainer}>
 
       {Object.keys(form).map((key) => (
         key !== "id" && (
           <View key={key}>
-            <Text style={styles.editExtLabel}>{key}</Text>
+            <Text style={styles.label}>{key}</Text>
             <TextInput
-              style={styles.editExtInput}
+              style={styles.input}
               value={String(form[key])}
               onChangeText={(val) => handleChange(key, val)}
             />
           </View>
         )
       ))}
+      <View style={styles.siteButtonRow}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.saveText}>Delete Extinguisher</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.editExtButton} onPress={handleSave}>
-        <Text style={styles.editExtButtonText}>Save Changes</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.editExtDeleteButton}
-        onPress={handleDelete}
-      >
-        <Text style={styles.editExtButtonText}>Delete Extinguisher</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveText}>Save Changes</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }

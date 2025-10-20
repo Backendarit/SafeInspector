@@ -74,36 +74,41 @@ export default function AddExtinguisher({ route, navigation }) {
   // --- INPUTS ---
 
   return (
-    <View style={styles.addExtContainer}>
-      <Text style={styles.addExtTitle}>Add Extinguisher</Text>
-
+    <View style={styles.backgroundContainer}>
+      <Text style={styles.label}>Extinguisher Type</Text>
       <TextInput
-        style={styles.addExtInput}
-        placeholder="Type (e.g. Tamrex 6kg ABC)"
+        style={styles.input}
+        placeholder="e.g. Tamrex 6kg ABC"
         value={type}
         onChangeText={setType}
       />
+
+      <Text style={styles.label}>Location</Text>
       <TextInput
-        style={styles.addExtInput}
-        placeholder="Location (e.g. Backroom)"
+        style={styles.input}
+        placeholder="e.g. Backroom"
         value={location}
         onChangeText={setLocation}
       />
+
+      <Text style={styles.label}>Manufacture Year</Text>
       <TextInput
-        style={styles.addExtInput}
-        placeholder="Manufacture Year (e.g. 2019)"
+        style={styles.input}
+        placeholder="e.g. 2025"
         value={manufactureYear}
         onChangeText={setManufactureYear}
         keyboardType="numeric"
       />
+
+      <Text style={styles.label}>Last Inspection</Text>
       <TextInput
-        style={styles.addExtInput}
-        placeholder="Last Inspection (YYYY-MM-DD)"
+        style={styles.input}
+        placeholder="YYYY-MM-DD"
         value={lastInspection}
         onChangeText={setLastInspection}
       />
 
-      <Text style={styles.addExtlabel}>Inspection Interval (years)</Text>
+      <Text style={styles.label}>Inspection Interval (years)</Text>
       <Picker
         selectedValue={intervalYears}
         onValueChange={(value) => setIntervalYears(value)}
@@ -113,15 +118,16 @@ export default function AddExtinguisher({ route, navigation }) {
         <Picker.Item label="2 years" value={2} />
       </Picker>
 
+      <Text style={styles.label}>Notes </Text>
       <TextInput
-        style={styles.addExtInput}
-        placeholder="Notes (optional)"
+        style={styles.input}
+        placeholder="(optional)"
         value={notes}
         onChangeText={setNotes}
       />
 
-      <TouchableOpacity style={styles.addExtButton} onPress={handleSave}>
-        <Text style={styles.addExtButtonText}>Save Extinguisher</Text>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <Text style={styles.saveText}>Save Extinguisher</Text>
       </TouchableOpacity>
     </View>
   );
