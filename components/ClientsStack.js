@@ -1,6 +1,6 @@
 import React from "react";  
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import { stackHeader } from "../components/headerOptions"; 
 import ClientList from "../screen/ClientList";
 import AddClient from "../screen/AddClient";
 import AddExtinguisher from "../screen/AddExtinguisher";
@@ -13,8 +13,8 @@ const Stack = createNativeStackNavigator();
 export default function ClientsStack({ clients, setClients }) {
 
   return (
-    <Stack.Navigator initialRouteName="ClientListScreen"> 
-        <Stack.Screen name="ClientListScreen" options={{title: "Clients"}}>
+    <Stack.Navigator initialRouteName="ClientListScreen" screenOptions={stackHeader}> 
+        <Stack.Screen name="ClientListScreen" options={{title: "Clients"} }>
             {(props) => (
                 <ClientList 
                     {...props}

@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
 
 //  --TEXTS--
     clientName: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
         color: "#000",
         flex: 1,
@@ -133,6 +133,24 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: 10,
+    },
+    statusBubble: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 8,
+        shadowColor: "#000",
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    extinguisherStatus: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        marginBottom: 8,
     },
 
 

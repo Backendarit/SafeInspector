@@ -141,43 +141,79 @@ export default function SiteDetail({ navigation, setClients }) {
       <FlatList
         data={currentSite.extinguishers}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.siteExtinguisherName}>{item.id} {item.type}</Text>
-            <Text>Location: {item.location}</Text>
-            <Text>Manufacture Year: {item.manufactureYear}</Text>
-            <Text>Last Inspection: {item.lastInspection}</Text>
-            <Text>Interval: {item.intervalYears} years</Text>
-            <Text>Next Inspection: {item.nextInspection}</Text>
-            <Text>Service Due: {item.serviceDue}</Text>
-            <Text>Status: {item.status}</Text>
-            {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+        renderItem={({ item }) => {
+          // Get color & icon by status
+          const getStatusStyle = (status) => {
+            switch (status) {
+              case "OK":
+                return { color: "#66B166", icon: "checkmark" }; 
+              case "Inspection Due":
+                return { color: "#ffcc00ff", icon: "time-outline" }; 
+              case "Service Due":
+                return { color: "#9b59b6", icon: "build" }; 
+              case "Late":
+                return { color: "#F45A5A", icon: "alert" }; 
+              default:
+                return { color: "#bdc3c7", icon: "help" }; //unknown
+            }
+          };
 
-            {/* --- Button Row --- */}
-            <View style={styles.siteButtonRow}>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={() => handleUpdateInspection(item)}
-              >
-              <Text style={styles.saveText}>Inspected today</Text>
-              </TouchableOpacity>
+          const { color, icon } = getStatusStyle(item.status);
 
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() =>
-                  navigation.navigate("EditExtinguisherScreen", {
-                    extinguisher: item,
-                    site,
-                    client,
-                  })
-                }
-              >
-              <Ionicons name="pencil" size={24} color="#fff" />
-              </TouchableOpacity>
+          return (
+            <View style={styles.card}>
+              {/* --- Header Row --- */}
+              <View style={styles.extinguisherStatus}>
+                {/* Status bubble */}
+                <View
+                  style={[
+                    styles.statusBubble,
+                    { backgroundColor: color },
+                  ]}
+                >
+                  <Ionicons name={icon} size={16} color="#fff" />
+                </View>
 
+                <Text style={styles.siteExtinguisherName}>
+                  {item.id} {item.type}
+                </Text>
+              </View>
+
+              {/* --- Extinguisher Info --- */}
+              <Text>Location: {item.location}</Text>
+              <Text>Manufacture Year: {item.manufactureYear}</Text>
+              <Text>Last Inspection: {item.lastInspection}</Text>
+              <Text>Interval: {item.intervalYears} years</Text>
+              <Text>Next Inspection: {item.nextInspection}</Text>
+              <Text>Service Due: {item.serviceDue}</Text>
+              <Text>Status: {item.status}</Text>
+              {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+
+              {/* --- Button Row --- */}
+              <View style={styles.siteButtonRow}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={() => handleUpdateInspection(item)}
+                >
+                  <Text style={styles.saveText}>Inspected today</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() =>
+                    navigation.navigate("EditExtinguisherScreen", {
+                      extinguisher: item,
+                      site,
+                      client,
+                    })
+                  }
+                >
+                  <Ionicons name="pencil" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
     </View>
   );
