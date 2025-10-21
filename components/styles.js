@@ -306,6 +306,22 @@ const styles = StyleSheet.create({
         color: "#fff", 
         fontWeight: "bold" 
     },
-});
+
+    // Map styles
+    mapContainer: { flex: 1 },
+    mapAbsoluteFill: StyleSheet.absoluteFillObject,
+
+    markerWrap: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    markerDot: {
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: "#ffffff",
+    },
+    });
 
 export default styles;
