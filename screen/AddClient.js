@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { BASE_URL } from "../config";
@@ -19,6 +20,8 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   const [address, setAddress] = useState("");
   const [contact, setContact] = useState("");
   const [phone, setPhone] = useState("");
+  const [latitude, setLatitude] = useState("");  
+  const [longitude, setLongitude] = useState(""); 
   const [loading, setLoading] = useState(false); // load POST
 
   const handleSave = async () => {
@@ -31,6 +34,15 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       return;
     }
 
+    //send coords only if valid numbers
+    const latNum = latitude === "" ? null : Number(latitude);
+    const lngNum = longitude === "" ? null : Number(longitude);
+    const hasCoords =
+      typeof latNum === "number" &&
+      typeof lngNum === "number" &&
+      !Number.isNaN(latNum) &&
+      !Number.isNaN(lngNum);
+
     setLoading(true);
 
     try {
@@ -40,7 +52,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         // New Client
         const newClient = {
           name: clientName,
-          businessId, // use form value
+          businessId,
           sites: [
             {
               id: Date.now().toString() + "-site",
@@ -48,11 +60,11 @@ export default function AddClient({ navigation, clients = [], setClients }) {
               address,
               contact: { name: contact, phone },
               extinguishers: [],
+              ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), // coordinates
             },
           ],
         };
-
-        // POST to Azure
+      // POST to Azure
         response = await fetch(`${BASE_URL}/api/clients`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -65,6 +77,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
           address,
           contact: { name: contact, phone },
           extinguishers: [],
+          ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), //coordinates
         };
 
         response = await fetch(`${BASE_URL}/api/clients/${selectedClient}/sites`, {
@@ -84,7 +97,6 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       // Show new client on clientlist
       if (data.client) {
         setClients((prev) => [...prev, data.client]);
-
         // Save to local SQLite
         try {
           const { addClient } = await import('../sqlconnection/db');
@@ -93,6 +105,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
           console.log('SQLite addClient failed', e);
         }
 
+        
       } else if (data.site) {
         // New site added to existing client
         setClients((prev) =>
@@ -102,7 +115,6 @@ export default function AddClient({ navigation, clients = [], setClients }) {
               : c
           )
         );
-
         // Find updated client and save to SQLite
         const updatedClient = clients.find((c) => String(c.id) === String(selectedClient));
         if (updatedClient) {
@@ -130,7 +142,8 @@ export default function AddClient({ navigation, clients = [], setClients }) {
   };
 
   return (
-    <View style={styles.backgroundContainer}>
+    <ScrollView style={styles.backgroundContainer}> 
+
       <Text style={styles.label}>Select client</Text>
       <Picker
         selectedValue={selectedClient}
@@ -197,6 +210,25 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         keyboardType="phone-pad"
       />
 
+      {/* coordinate fields */}
+      <Text style={styles.label}>Latitude (optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={latitude}
+        onChangeText={setLatitude}
+        placeholder="e.g. 61.4981"
+        keyboardType="numeric"
+      />
+
+      <Text style={styles.label}>Longitude (optional)</Text>
+      <TextInput
+        style={styles.input}
+        value={longitude}
+        onChangeText={setLongitude}
+        placeholder="e.g. 23.7600"
+        keyboardType="numeric"
+      />
+
       <TouchableOpacity
         style={[styles.saveButton, loading && { opacity: 0.6 }]}
         onPress={handleSave}
@@ -206,6 +238,6 @@ export default function AddClient({ navigation, clients = [], setClients }) {
           {loading ? "Saving..." : "Save"}
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
