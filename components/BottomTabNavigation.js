@@ -32,7 +32,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             }}
         >
             {(props) => (
-                <ClientsStack 
+                <WorkQueueStack 
                     {...props}
                     clients={clients}
                     setClients={setClients}
