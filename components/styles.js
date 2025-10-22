@@ -16,6 +16,11 @@ const styles = StyleSheet.create({
         padding: 8,
         elevation: 3,
     },
+    inspectionButton: {
+        backgroundColor: "#66B166",
+        padding: 8,
+        borderRadius: 6,
+    },
 
     //Home.js-styles
     homeContainer: {
