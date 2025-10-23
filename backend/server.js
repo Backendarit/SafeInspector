@@ -42,7 +42,7 @@ app.use("/api/clients", extinguisherRoutes);
 
 // Root
 app.get("/", (req, res) => {
-  res.send(`SafeInspector backend updated 20/10/2025 klo 22 and is hopefully running successfully!`);
+  res.send(`SafeInspector backend updated 21/10/2025 klo 22 and is hopefully running successfully!`);
 });
 
 // Start server

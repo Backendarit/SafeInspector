@@ -21,14 +21,14 @@ export default function BottomTabNavigation({ clients, setClients }) {
         >
         <Tab.Screen name="Home" component={HomeStack} 
             options={{ tabBarIcon: ({ color, size }) => (
-                <Ionicons name='home-outline' size={size} color={color} />
+                <Ionicons name='home' size={size} color={color} />
                 ),
             }}
         />
 
         <Tab.Screen name="WorkQueue" 
             options={{ tabBarIcon: ({ color, size }) => (
-                <Ionicons name='checkmark-circle-outline' size={size} color={color}/>
+                <Ionicons name='checkmark-circle' size={size} color={color}/>
                 ),
             }}
         >
@@ -46,7 +46,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             options={{
                  headerShown: false,
                 tabBarIcon: ({ color, size }) => (
-                    <Ionicons name="map-outline" size={size} color={color} />
+                    <Ionicons name="map" size={size} color={color} />
                 ),
             }}
         >
@@ -61,7 +61,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
 
         <Tab.Screen name="Clients" 
             options={{ tabBarIcon: ({ color, size }) => (
-                <Ionicons name='people-outline' size={size} color={color} />
+                <Ionicons name='people' size={size} color={color} />
                 ),
             }}
         >

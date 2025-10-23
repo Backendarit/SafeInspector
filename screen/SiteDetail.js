@@ -40,7 +40,7 @@ export default function SiteDetail({ navigation, setClients }) {
       };
 
       fetchUpdatedSite();
-    }, [client.id, site.id])
+    }, [client.id, site.id, setClients])
   );
 
   //  Update Inspection 
@@ -49,10 +49,8 @@ export default function SiteDetail({ navigation, setClients }) {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,{
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ inspectToday: true })}
+      `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
+      {method: "POST", headers: { "Content-Type": "application/json" },}
       );
 
       const data = await response.json();
@@ -88,6 +86,13 @@ export default function SiteDetail({ navigation, setClients }) {
             : c
         )
       );
+      // Update Current Site
+      setCurrentSite(prev => ({
+      ...prev,
+      extinguishers: prev.extinguishers.map(ext =>
+        ext.id === extinguisher.id ? data.extinguisher : ext
+      ),
+      }));
 
       Alert.alert("Success", "Inspection updated successfully.");
     } catch (err) {
