@@ -132,10 +132,20 @@ const styles = StyleSheet.create({
     },
 
     //SiteDetail.js
+    siteContainer: { 
+        flex: 1, 
+        padding: 15, 
+        backgroundColor: "#F0F3F5" 
+    },
     siteHeaderRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+    },
+    siteTitle: { 
+        fontSize: 24, 
+        fontWeight: "bold", 
+        marginBottom: 5 
     },
     siteExtHeader: {
         flexDirection: "row",
@@ -143,6 +153,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 10,
         marginLeft: 12,
+    },
+    siteCard: {
+        backgroundColor: "#fff",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+        elevation: 2,
     },
     siteExtinguisherName: {
         fontSize: 18,
@@ -158,6 +175,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: 10,
+    },
+    siteSmallButton: {
+        backgroundColor: "#176817",
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 6,
+        marginRight: 10,
+        alignItems: "center",
+    },
+    siteButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
     statusBubble: {
         width: 24,

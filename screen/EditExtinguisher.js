@@ -25,7 +25,7 @@ export default function EditExtinguisher() {
   // Update Extinguisher Information
   const handleSave = async () => {
     try {
-      const resp = await fetch(
+      const response = await fetch(
         `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}`,
         {
           method: 'PUT',
@@ -33,14 +33,17 @@ export default function EditExtinguisher() {
           body: JSON.stringify(form),
         }
       );
-      if (!response.ok) throw new Error("Update failed");
-      Alert.alert("Success", "Extinguisher updated successfully.");
+      const data = await response.json();  
+
+      if (!response.ok) throw new Error(data.message || 'Update failed');
+      Alert.alert('Success', 'Extinguisher updated successfully.');
       navigation.goBack();
     } catch (err) {
       console.error(err);
       Alert.alert('Error', 'Failed to update extinguisher');
     }
   };
+
   // Delete Extinguisher
   const handleDelete = () => {
     Alert.alert(
