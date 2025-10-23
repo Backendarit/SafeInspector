@@ -89,7 +89,9 @@ export default function WorkQueue({ clients, setClients }) {
         Alert.alert("Inspection not allowed. Next inspection exceeds service due.");
         return;
       }
-        const updatedExtinguisherStatus = backendData.extinguisher;
+
+      //for messages
+      const updatedExtinguisherStatus = backendData.extinguisher;
 
         // new version of clients list
         setClients(prevClients =>
@@ -142,8 +144,11 @@ export default function WorkQueue({ clients, setClients }) {
       </View>
       </TouchableOpacity>
       <View style={styles.siteButtonRow}>
-        <TouchableOpacity style = {styles.siteSmallButton} onPress = { () => handleStatusUpdate(item) }>
-          <Text style={styles.siteButtonText}> Update Inspection Status </Text>
+        {/* if status is "late", change button color */}
+        <TouchableOpacity style = {[styles.siteSmallButton, item.status === "Late" && styles.statusLateButton]} 
+          onPress = { () => handleStatusUpdate(item) }>
+          {/* if status is "late", change button text */}
+          <Text style={styles.siteButtonText}> {item.status === "Late" ? "Inspection Late" : "Update Inspection Status"} </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -155,15 +160,17 @@ export default function WorkQueue({ clients, setClients }) {
         <Text style={styles.siteTitle}>Tasks and inspections {today}</Text>
       </View>
       <View style={styles.siteButtonRow}>
-        <TouchableOpacity style={styles.siteSmallButton} onPress={() => setFilterExt("all")}>
-          <Text style={styles.siteButtonText}> All </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.siteSmallButton} onPress={() => setFilterExt("dueToday")}>
-          <Text style={styles.siteButtonText}> Due Today </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.siteSmallButton} onPress={() => setFilterExt("late")}>
-          <Text style={styles.siteButtonText}> Late </Text>
-        </TouchableOpacity>
+        {/* button colors chance based on which button is active  */}
+        {["all", "dueToday", "late"].map((filter) => (
+          <TouchableOpacity 
+            key={filter}
+            style={[styles.inspectionButton, filterExt === filter && styles.activeInspButton]} 
+            onPress={() => setFilterExt(filter)}>
+            <Text style={[styles.inspectionButtonText, filterExt === filter && styles.activeInsButtonText]}> 
+              {filter === "all" ? "All" : filter === "dueToday" ? "Due Today" : "Late"} 
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <View>
       <FlatList

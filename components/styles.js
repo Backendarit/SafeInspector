@@ -16,10 +16,30 @@ const styles = StyleSheet.create({
         padding: 8,
         elevation: 3,
     },
+
+    //WorkQueue.js-styles
+    statusLateButton: {
+        backgroundColor: "#F45A5A",
+    },
     inspectionButton: {
-        backgroundColor: "#66B166",
-        padding: 8,
+        backgroundColor: "#ffffffff",
+        borderWidth: 2,
+        borderColor: "black",
+        paddingVertical: 6,
+        paddingHorizontal: 14,
         borderRadius: 6,
+        marginRight: 10,
+        alignItems: "center",
+    },
+    inspectionButtonText: {
+        color: "black",
+        fontWeight: "bold",
+    },
+    activeInspButton: {
+        backgroundColor: "black",
+    },
+    activeInsButtonText: {
+        color: "white",
     },
 
     //Home.js-styles
