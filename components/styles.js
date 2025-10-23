@@ -63,6 +63,31 @@ const styles = StyleSheet.create({
     },
 
 
+    //WorkQueue.js-styles
+    statusLateButton: {
+        backgroundColor: "#F45A5A",
+    },
+    inspectionButton: {
+        backgroundColor: "#ffffffff",
+        borderWidth: 2,
+        borderColor: "black",
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 6,
+        marginRight: 10,
+        alignItems: "center",
+    },
+    inspectionButtonText: {
+        color: "black",
+        fontWeight: "bold",
+    },
+    activeInspButton: {
+        backgroundColor: "black",
+    },
+    activeInsButtonText: {
+        color: "white",
+    },
+
     //Home.js-styles
     homeContainer: {
         flex: 1,

@@ -33,7 +33,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             }}
         >
             {(props) => (
-                <ClientsStack 
+                <WorkQueueStack 
                     {...props}
                     clients={clients}
                     setClients={setClients}
@@ -44,7 +44,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             <Tab.Screen
             name="Maps"
             options={{
-                 headerShown: false,
+                headerShown: false,
                 tabBarIcon: ({ color, size }) => (
                     <Ionicons name="map" size={size} color={color} />
                 ),

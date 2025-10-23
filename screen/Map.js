@@ -51,15 +51,18 @@ export default function Maps({ navigation, clients = [] }) {
 
     let hasLate = false;
     let hasServiceDue = false;
+    let hasInspectionDue = false;
 
     for (const e of extinguishers) {
       const status = String(e.status || "").toLowerCase();
       if (status.includes("late")) hasLate = true;
       if (status.includes("service")) hasServiceDue = true;
+      if (status.includes("inspection")) hasInspectionDue = true; 
     }
 
     if (hasLate) return "red"; // late
     if (hasServiceDue) return "orange"; // service due
+    if (hasInspectionDue) return "yellow"; // Inspection due
     return "green"; // OK
   };
 
