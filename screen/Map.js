@@ -67,7 +67,7 @@ export default function Maps({ navigation, clients = [] }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.backgroundContainer}>
       <MapView
         style={StyleSheet.absoluteFill}
         provider="google"

@@ -40,7 +40,7 @@ export default function SiteDetail({ navigation, setClients }) {
       };
 
       fetchUpdatedSite();
-    }, [client.id, site.id])
+    }, [client.id, site.id, setClients])
   );
 
   //  Update Inspection 
@@ -49,10 +49,8 @@ export default function SiteDetail({ navigation, setClients }) {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,{
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ inspectToday: true })}
+      `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
+      {method: "POST", headers: { "Content-Type": "application/json" },}
       );
 
       const data = await response.json();
@@ -88,6 +86,13 @@ export default function SiteDetail({ navigation, setClients }) {
             : c
         )
       );
+      // Update Current Site
+      setCurrentSite(prev => ({
+      ...prev,
+      extinguishers: prev.extinguishers.map(ext =>
+        ext.id === extinguisher.id ? data.extinguisher : ext
+      ),
+      }));
 
       Alert.alert("Success", "Inspection updated successfully.");
     } catch (err) {
@@ -100,11 +105,11 @@ export default function SiteDetail({ navigation, setClients }) {
 
   // Käyttöliittymä
   return (
-    <View style={styles.siteContainer}>
+    <View style={styles.backgroundContainer}>
       {/* --- Site Header --- */}
-      <View style={styles.siteCard}>
+      <View style={styles.card}>
         <View style={styles.siteHeaderRow}>
-          <Text style={styles.siteTitle}>{currentSite.name}</Text>
+          <Text style={styles.clientName}>{currentSite.name}</Text>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() =>
@@ -117,13 +122,13 @@ export default function SiteDetail({ navigation, setClients }) {
             <Ionicons name="pencil" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text>Address: {currentSite.address}</Text>
-        <Text>Contact: {currentSite.contact.name}</Text>
-        <Text>Phone: {currentSite.contact.phone}</Text>
+        <Text style={styles.textDetails}>Address: {currentSite.address}</Text>
+        <Text style={styles.textDetails}>Contact: {currentSite.contact.name}</Text>
+        <Text style={styles.textDetails}>Phone: {currentSite.contact.phone}</Text>
       </View>
       {/* --- Extinguishers Header with Add Button --- */}
       <View style={styles.siteExtHeader}> 
-        <Text style={styles.siteSectionTitle}>Extinguishers</Text>
+        <Text style={styles.clientName}>Extinguishers</Text>
         <TouchableOpacity
           style={styles.addButton} 
           onPress={() =>
@@ -133,7 +138,7 @@ export default function SiteDetail({ navigation, setClients }) {
             })
           }
         >
-          <Ionicons name="add" size={26} color="#fff" />
+          <Ionicons name="add-circle" size={40} color="#66B166" />
         </TouchableOpacity>
       </View>
 
@@ -141,43 +146,79 @@ export default function SiteDetail({ navigation, setClients }) {
       <FlatList
         data={currentSite.extinguishers}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.siteCard}>
-            <Text style={styles.siteExtinguisherName}>{item.id} {item.type}</Text>
-            <Text>Location: {item.location}</Text>
-            <Text>Manufacture Year: {item.manufactureYear}</Text>
-            <Text>Last Inspection: {item.lastInspection}</Text>
-            <Text>Interval: {item.intervalYears} years</Text>
-            <Text>Next Inspection: {item.nextInspection}</Text>
-            <Text>Service Due: {item.serviceDue}</Text>
-            <Text>Status: {item.status}</Text>
-            {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+        renderItem={({ item }) => {
+          // Get color & icon by status
+          const getStatusStyle = (status) => {
+            switch (status) {
+              case "OK":
+                return { color: "#66B166", icon: "checkmark" }; 
+              case "Inspection Due":
+                return { color: "#ffcc00ff", icon: "time-outline" }; 
+              case "Service Due":
+                return { color: "#9b59b6", icon: "build" }; 
+              case "Late":
+                return { color: "#F45A5A", icon: "alert" }; 
+              default:
+                return { color: "#bdc3c7", icon: "help" }; //unknown
+            }
+          };
 
-            {/* --- Button Row --- */}
-            <View style={styles.siteButtonRow}>
-              <TouchableOpacity
-                style={styles.siteSmallButton}
-                onPress={() => handleUpdateInspection(item)}
-              >
-              <Text style={styles.siteButtonText}>Inspected today</Text>
-              </TouchableOpacity>
+          const { color, icon } = getStatusStyle(item.status);
 
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() =>
-                  navigation.navigate("EditExtinguisherScreen", {
-                    extinguisher: item,
-                    site,
-                    client,
-                  })
-                }
-              >
-              <Ionicons name="pencil" size={22} color="#fff" />
-              </TouchableOpacity>
+          return (
+            <View style={styles.card}>
+              {/* --- Header Row --- */}
+              <View style={styles.extinguisherStatus}>
+                {/* Status bubble */}
+                <View
+                  style={[
+                    styles.statusBubble,
+                    { backgroundColor: color },
+                  ]}
+                >
+                  <Ionicons name={icon} size={16} color="#fff" />
+                </View>
 
+                <Text style={styles.siteExtinguisherName}>
+                  {item.id} {item.type}
+                </Text>
+              </View>
+
+              {/* --- Extinguisher Info --- */}
+              <Text>Location: {item.location}</Text>
+              <Text>Manufacture Year: {item.manufactureYear}</Text>
+              <Text>Last Inspection: {item.lastInspection}</Text>
+              <Text>Interval: {item.intervalYears} years</Text>
+              <Text>Next Inspection: {item.nextInspection}</Text>
+              <Text>Service Due: {item.serviceDue}</Text>
+              <Text>Status: {item.status}</Text>
+              {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+
+              {/* --- Button Row --- */}
+              <View style={styles.siteButtonRow}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={() => handleUpdateInspection(item)}
+                >
+                  <Text style={styles.saveText}>Inspected today</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() =>
+                    navigation.navigate("EditExtinguisherScreen", {
+                      extinguisher: item,
+                      site,
+                      client,
+                    })
+                  }
+                >
+                  <Ionicons name="pencil" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
     </View>
   );

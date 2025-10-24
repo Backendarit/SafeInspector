@@ -26,22 +26,24 @@ export default function EditExtinguisher() {
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}`,
         {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),
         }
       );
+      const data = await response.json();  
 
-      if (!response.ok) throw new Error("Update failed");
-      Alert.alert("Success", "Extinguisher updated successfully.");
+      if (!response.ok) throw new Error(data.message || 'Update failed');
+      Alert.alert('Success', 'Extinguisher updated successfully.');
       navigation.goBack();
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Failed to update extinguisher.");
+      Alert.alert('Error', 'Failed to update extinguisher');
     }
   };
+
   // Delete Extinguisher
   const handleDelete = () => {
     Alert.alert(
@@ -73,32 +75,29 @@ export default function EditExtinguisher() {
 
 
   return (
-    <ScrollView style={styles.editExtContainer}>
-      <Text style={styles.editExtTitle}>Edit Extinguisher</Text>
+    <ScrollView style={styles.backgroundContainer}>
 
       {Object.keys(form).map((key) => (
         key !== "id" && (
           <View key={key}>
-            <Text style={styles.editExtLabel}>{key}</Text>
+            <Text style={styles.label}>{key}</Text>
             <TextInput
-              style={styles.editExtInput}
+              style={styles.input}
               value={String(form[key])}
               onChangeText={(val) => handleChange(key, val)}
             />
           </View>
         )
       ))}
+      <View style={styles.siteButtonRow}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.saveText}>Delete Extinguisher</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.editExtButton} onPress={handleSave}>
-        <Text style={styles.editExtButtonText}>Save Changes</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.editExtDeleteButton}
-        onPress={handleDelete}
-      >
-        <Text style={styles.editExtButtonText}>Delete Extinguisher</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveText}>Save Changes</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }

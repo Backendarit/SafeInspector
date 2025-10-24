@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import WorkQueue from "../screen/WorkQueue";
 import SiteDetail from "../screen/SiteDetail";
+import { stackHeader } from "../components/headerOptions"; 
 
 const Stack = createNativeStackNavigator();
 
