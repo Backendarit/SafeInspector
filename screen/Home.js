@@ -3,9 +3,12 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../components/styles';
 
+// Load SafeInspector logo from assets
 const LOGO = require('../assets/safeinspector.png');
 
+
 export default function Home({ navigation, clients = [] }) {
+  // Get today's date in format YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0];
 
 // Counters for inspections due today and late inspection 
@@ -56,7 +59,7 @@ clients.map(c => c.sites || []).flat().map(s => s.extinguishers || []).flat().fo
           <Text style={styles.homeSummaryLabel}>Late</Text>
           <Text style={styles.homeSummaryValue}>{late}</Text>
         </View>
-        
+
         {/* Button to Work queue */}
         <TouchableOpacity
           style={styles.homeWorkButton}
