@@ -19,12 +19,22 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 headerShown: false
             }}
         >
-        <Tab.Screen name="Home" component={HomeStack} 
-            options={{ tabBarIcon: ({ color, size }) => (
-                <Ionicons name='home' size={size} color={color} />
-                ),
-            }}
-        />
+        <Tab.Screen name="Home"
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="home-outline" size={size} color={color} />
+                    ),
+                }}
+                >
+                {(props) => (
+                    <HomeStack
+                    {...props}
+                    clients={clients}
+                    setClients={setClients}
+                    />
+                )}
+                </Tab.Screen>
+
 
         <Tab.Screen name="WorkQueue" 
             options={{ tabBarIcon: ({ color, size }) => (

@@ -95,22 +95,62 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    homeTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 40,
+    
+    homeSummaryCard: {
+        backgroundColor: '#fff',
+        width: '85%',
+        alignSelf: 'center',
+        borderRadius: 10,
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        marginBottom: 25,
+        elevation: 3,
+    },
+    homeSummaryTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+        marginBottom: 12,
+        color: '#222',
+        textAlign: 'center',
+    },
+    homeSummaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start', 
+        alignItems: 'center',
+        marginVertical: 6,
+        paddingHorizontal: 20,        
+     },
+
+    homeSummaryIconGreen: {
+        color: '#176817',
+        fontSize: 20,
+        marginRight: 10,
+    },
+    homeSummaryIconRed: {
+        color: '#c62828',
+        fontSize: 20,
+        marginRight: 10,
+    },
+    homeSummaryLabel: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    homeSummaryValue: {
+        fontSize: 16,
+        fontWeight: '700',
         color: '#000',
     },
-    homeButton: {
-        backgroundColor: '#000',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 12,
-        marginBottom: 15,
+    homeWorkButton: {
+        backgroundColor: '#176817',
+        borderRadius: 8,
+        paddingVertical: 12,
+        marginTop: 20,
+        alignItems: 'center',
     },
-    homeButtonText: {
+    homeWorkButtonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
     },
 
