@@ -26,7 +26,7 @@ router.post("/:clientId/sites/:siteId/extinguishers", (req, res) => {
     site.extinguishers.push(extinguisher);
     res.status(201).json({ message: "Extinguisher added", extinguisher });
   } catch (err) {
-    res.status(400).json({ error: "Inspection blocked", message: err.message });
+    res.status(400).json({ error: "Error adding Extinguisher", message: err.message });
   }
 });
 

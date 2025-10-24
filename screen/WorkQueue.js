@@ -75,7 +75,7 @@ export default function WorkQueue({ clients, setClients }) {
       const response = await fetch(
         `${BASE_URL}/api/clients/${item.clientId}/sites/${item.siteId}/extinguishers/${item.id}/inspect`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ inspectToday: true })
         }

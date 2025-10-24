@@ -41,7 +41,7 @@ router.post("/:clientId/sites", (req, res) => {
   res.status(201).json({ message: "Site added", site: newSite });
 });
 
-// Update site
+// Update site --ONLY POSTMAN--
 router.put("/:clientId/sites/:siteId", (req, res) => {
   const { clientId, siteId } = req.params;
   const client = clients.find((c) => c.id === clientId);
@@ -65,7 +65,7 @@ router.put("/:clientId/sites/:siteId", (req, res) => {
 });
 
 
-// DELETE site
+// DELETE site --ONLY POSTMAN--
 router.delete("/:clientId/sites/:siteId", (req, res) => {
   const { clientId, siteId } = req.params;
   const client = clients.find((c) => c.id === clientId);

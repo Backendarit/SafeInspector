@@ -10,25 +10,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Data
-const clients = require("./data/clientsData");
-const { calculateExtinguisherStatus } = require("./utils/extinguisherUtils");
-
-// Auto-update extinguisher status before all requests
-app.use((req, res, next) => {
-  try {
-    clients.forEach((client) => {
-      client.sites.forEach((site) => {
-        site.extinguishers.forEach((ext) => {
-          ext.status = calculateExtinguisherStatus(ext);
-        });
-      });
-    });
-  } catch (err) {
-    console.error("Error updating extinguisher status:", err);
-  }
-  next(); // continue to next route
-});
 
 // Routes
 const extinguisherRoutes = require("./routes/extinguisherRoutes");
@@ -42,7 +23,7 @@ app.use("/api/clients", extinguisherRoutes);
 
 // Root
 app.get("/", (req, res) => {
-  res.send(`SafeInspector backend updated 23/10/2025 klo 23 and is hopefully running successfully!`);
+  res.send(`SafeInspector backend updated 24/10/2025 klo 23 and is hopefully running successfully!`);
 });
 
 // Start server

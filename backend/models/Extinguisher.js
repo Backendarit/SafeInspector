@@ -24,18 +24,7 @@ class Extinguisher {
       throw new Error(`Next inspection exceeds service due (${this.serviceDue}).`);
     }
     // Status from utils
-    this.status = calculateExtinguisherStatus(this);
-  }
-
-  updateInspection() {
-    this.lastInspection = new Date().toISOString().split("T")[0];
-    this.nextInspection = calculateNextInspection(this.lastInspection, this.intervalYears);
-    this.serviceDue = calculateServiceDueDate(this.manufactureYear, this.lastInspection);
-    this.status = calculateExtinguisherStatus(this);
-  }
-
-  refreshStatus() {
-    this.status = calculateExtinguisherStatus(this);
+    this.status = data.status || calculateExtinguisherStatus(this);
   }
 }
 
