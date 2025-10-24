@@ -61,8 +61,8 @@ export default function Maps({ navigation, clients = [] }) {
     }
 
     if (hasLate) return "red"; // late
-    if (hasServiceDue) return "orange"; // service due
-    if (hasInspectionDue) return "yellow"; // Inspection due
+    if (hasServiceDue) return "purple"; // service due
+    if (hasInspectionDue) return "orange"; // Inspection due
     return "green"; // OK
   };
 
