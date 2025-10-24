@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -7,53 +7,46 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { BASE_URL } from "../config";
-import styles from '../components/styles';
+import styles from "../components/styles";
 
-export default function ClientList() {
+export default function ClientList({ clients = [], setClients }) {
   const navigation = useNavigation();
-  const route = useRoute();
 
-  // Search bar
-  const initialSearch = route.params?.search || "";
-  const [search, setSearch] = useState(initialSearch);
+  // Search text typed by the user
+  const [search, setSearch] = useState("");
 
-  // Client Data
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true); // lataus-indikaattori
-  const [refreshing, setRefreshing] = useState(false); // pull-to-refresh state
-  const [error, setError] = useState(null); 
-  const [expandedClientId, setExpandedClientId] = useState(null);
+  // Page control states
+  const [refreshing, setRefreshing] = useState(false); // true when user pulls to refresh
+  const [loading, setLoading] = useState(false);       // true when we are loading data
+  const [error, setError] = useState(null);            // store error message if fetch fails
+  const [expandedClientId, setExpandedClientId] = useState(null); // shows which client is open
 
-  // Azure Data
-    const fetchClients = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/api/clients`);
-        console.log("Fetching:", `${BASE_URL}/api/clients`);
+  // Get client list from Azure backend
+  const fetchClients = async () => {
+    if (loading || refreshing) return; // stop if we are already fetching
 
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Received data:", data); // debug
-        setClients(data); // save data to setClients
-        setError(null); // tyhjennä aiemmat virheet onnistuneella fetchillä
-      } catch (err) {
-        console.error("Error fetching clients:", err);
-        setError("Failed to load clients. Please try again later.");
-      } finally {
-        setLoading(false); // hide load
-        setRefreshing(false); // lopeta refresh-tilanne
-      }
-    };
+    setRefreshing(true);
+    setError(null);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
+    try {
+      console.log("Getting latest clients from Azure...");
+      const response = await fetch(`${BASE_URL}/api/clients`);
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
-  // Search clients and their sites
+      const data = await response.json();
+      setClients(data); // save the updated list to the main App state
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      setError("Could not load client data. Please try again.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Search for clients or sites that match the search text
   const filteredClients = clients.filter((client) => {
     const clientMatch = client.name.toLowerCase().includes(search.toLowerCase());
     const siteMatch = client.sites?.some((site) =>
@@ -62,21 +55,15 @@ export default function ClientList() {
     return clientMatch || siteMatch;
   });
 
-  // Expand Client to Sites
+  // Open or close a client's site list
   const toggleExpand = (id) => {
     setExpandedClientId(expandedClientId === id ? null : id);
   };
 
-  // Pull-to-refresh
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchClients();
-  };
-
-  if (loading) {
-    // Show loading
+  // Show a spinner while we wait for the first data
+  if (!clients.length && (loading || refreshing)) {
     return (
-      <View style={styles.container}>
+      <View style={styles.backgroundContainer}>
         <ActivityIndicator size="large" color="green" />
       </View>
     );
@@ -84,15 +71,15 @@ export default function ClientList() {
 
   return (
     <View style={styles.backgroundContainer}>
-      {/* Searchbar */}
+      {/* Search bar */}
       <TextInput
         style={styles.input}
-        placeholder="Search clients..."
+        placeholder="Search clients or sites..."
         value={search}
         onChangeText={setSearch}
       />
 
-      {/* Add CLient */}
+      {/* Button to add a new client */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddClientScreen")}
@@ -100,21 +87,21 @@ export default function ClientList() {
         <Ionicons name="add-circle" size={40} color="#66B166" />
       </TouchableOpacity>
 
-      {/* Client List */}
+      {/* List of all clients (with pull-to-refresh) */}
       <FlatList
         data={filteredClients}
         keyExtractor={(item) => item.id}
-        refreshing={refreshing}   // Pull-to-refresh 
-        onRefresh={onRefresh}     
+        refreshing={refreshing}   // pull to refresh control
+        onRefresh={fetchClients}  // when user refreshes
         renderItem={({ item }) => (
           <View style={styles.card}>
-            {/* Clients */}
+            {/* 👤 Client info */}
             <TouchableOpacity onPress={() => toggleExpand(item.id)}>
               <Text style={styles.clientName}>{item.name}</Text>
               <Text style={styles.clientSiteCount}>{item.sites.length} sites</Text>
             </TouchableOpacity>
 
-            {/* Widen to Sites if Client is open */}
+            {/* Show client's sites when opened */}
             {expandedClientId === item.id && (
               <View>
                 {item.sites.map((site) => (
@@ -122,7 +109,10 @@ export default function ClientList() {
                     key={site.id}
                     style={styles.clientSiteCard}
                     onPress={() =>
-                      navigation.navigate("SiteDetailScreen", { site, client: item })
+                      navigation.navigate("SiteDetailScreen", {
+                        site,
+                        client: item,
+                      })
                     }
                   >
                     <Text style={styles.siteExtinguisherName}>• {site.name}</Text>
@@ -135,8 +125,21 @@ export default function ClientList() {
             )}
           </View>
         )}
+        ListEmptyComponent={
+          !loading && (
+            <Text style={{ textAlign: "center", marginTop: 20, color: "#888" }}>
+              No clients found.
+            </Text>
+          )
+        }
       />
+
+      {/* Error message if something goes wrong */}
+      {error && (
+        <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
-

@@ -10,16 +10,19 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { BASE_URL } from "../config";
-import styles from '../components/styles';
-
+import styles from "../components/styles";
 
 export default function SiteDetail({ navigation, setClients }) {
   const route = useRoute();
   const { site, client } = route.params;
+
+  // Current site data (will update when inspection or edit happens)
   const [currentSite, setCurrentSite] = useState(site);
+
+  // Loading spinner control
   const [loading, setLoading] = useState(false);
 
-  // Retrieves the latest information
+  // Latest site data when opened
   useFocusEffect(
     useCallback(() => {
       const fetchUpdatedSite = async () => {
@@ -31,9 +34,9 @@ export default function SiteDetail({ navigation, setClients }) {
             const updatedSite = updatedClient.sites.find((s) => s.id === site.id);
             if (updatedSite) setCurrentSite(updatedSite);
           }
-          // if not ok, just skip and keep local data
-        } catch (_) {
-          // silent: ignore network errors, keep local data
+          // If fetch fails, keep the local data instead of crashing
+        } catch (err) {
+          console.warn("Failed to refresh site data:", err);
         } finally {
           setLoading(false);
         }
@@ -43,30 +46,34 @@ export default function SiteDetail({ navigation, setClients }) {
     }, [client.id, site.id, setClients])
   );
 
-  //  Update Inspection 
+  /**
+   * Handle "Inspected today" button press.
+   * Sends a POST request to backend to mark extinguisher as inspected today.
+   * Updates both the global client list and this screen's local state.
+   */
   const handleUpdateInspection = async (extinguisher) => {
     setLoading(true);
-
     try {
       const response = await fetch(
-      `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
-      {method: "POST", headers: { "Content-Type": "application/json" },}
+        `${BASE_URL}/api/clients/${client.id}/sites/${site.id}/extinguishers/${extinguisher.id}/inspect`,
+        { method: "POST", headers: { "Content-Type": "application/json" } }
       );
 
       const data = await response.json();
-          // If Service Due is before next Inspection
+
+      // If backend reports that the extinguisher cannot be inspected yet
       if (!response.ok && data.error === "Inspection blocked") {
         Alert.alert(
           "Service Due Approaching",
           data.message,
           [{ text: "OK", style: "default" }]
         );
-        return; // do not update
+        return;
       }
 
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
-      // Update localstate
+      // Update client list
       setClients((prev) =>
         prev.map((c) =>
           c.id === client.id
@@ -86,12 +93,13 @@ export default function SiteDetail({ navigation, setClients }) {
             : c
         )
       );
-      // Update Current Site
-      setCurrentSite(prev => ({
-      ...prev,
-      extinguishers: prev.extinguishers.map(ext =>
-        ext.id === extinguisher.id ? data.extinguisher : ext
-      ),
+
+      // Update local site state for this screen
+      setCurrentSite((prev) => ({
+        ...prev,
+        extinguishers: prev.extinguishers.map((ext) =>
+          ext.id === extinguisher.id ? data.extinguisher : ext
+        ),
       }));
 
       Alert.alert("Success", "Inspection updated successfully.");
@@ -103,10 +111,25 @@ export default function SiteDetail({ navigation, setClients }) {
     }
   };
 
-  // Käyttöliittymä
+  //Color and icon for extinguishers status.
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "OK":
+        return { color: "#66B166", icon: "checkmark" };
+      case "Inspection Due":
+        return { color: "#ffcc00ff", icon: "time-outline" };
+      case "Service Due":
+        return { color: "#9b59b6", icon: "build" };
+      case "Late":
+        return { color: "#F45A5A", icon: "alert" };
+      default:
+        return { color: "#bdc3c7", icon: "help" };
+    }
+  };
+
   return (
     <View style={styles.backgroundContainer}>
-      {/* --- Site Header --- */}
+      {/* Site Header */}
       <View style={styles.card}>
         <View style={styles.siteHeaderRow}>
           <Text style={styles.clientName}>{currentSite.name}</Text>
@@ -126,11 +149,12 @@ export default function SiteDetail({ navigation, setClients }) {
         <Text style={styles.textDetails}>Contact: {currentSite.contact.name}</Text>
         <Text style={styles.textDetails}>Phone: {currentSite.contact.phone}</Text>
       </View>
-      {/* --- Extinguishers Header with Add Button --- */}
-      <View style={styles.siteExtHeader}> 
+
+      {/* Extinguisher header with Add button */}
+      <View style={styles.siteExtHeader}>
         <Text style={styles.clientName}>Extinguishers</Text>
         <TouchableOpacity
-          style={styles.addButton} 
+          style={styles.addButton}
           onPress={() =>
             navigation.navigate("AddExtinguisherScreen", {
               clientId: client.id,
@@ -142,49 +166,29 @@ export default function SiteDetail({ navigation, setClients }) {
         </TouchableOpacity>
       </View>
 
+      {/* Loading indicator when waiting for response */}
       {loading && <ActivityIndicator size="large" color="green" />}
+
+      {/* List of all extinguishers */}
       <FlatList
         data={currentSite.extinguishers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          // Get color & icon by status
-          const getStatusStyle = (status) => {
-            switch (status) {
-              case "OK":
-                return { color: "#66B166", icon: "checkmark" }; 
-              case "Inspection Due":
-                return { color: "#ffcc00ff", icon: "time-outline" }; 
-              case "Service Due":
-                return { color: "#9b59b6", icon: "build" }; 
-              case "Late":
-                return { color: "#F45A5A", icon: "alert" }; 
-              default:
-                return { color: "#bdc3c7", icon: "help" }; //unknown
-            }
-          };
-
           const { color, icon } = getStatusStyle(item.status);
 
           return (
             <View style={styles.card}>
-              {/* --- Header Row --- */}
+              {/* Header row with status icon */}
               <View style={styles.extinguisherStatus}>
-                {/* Status bubble */}
-                <View
-                  style={[
-                    styles.statusBubble,
-                    { backgroundColor: color },
-                  ]}
-                >
+                <View style={[styles.statusBubble, { backgroundColor: color }]}>
                   <Ionicons name={icon} size={16} color="#fff" />
                 </View>
-
                 <Text style={styles.siteExtinguisherName}>
                   {item.id} {item.type}
                 </Text>
               </View>
 
-              {/* --- Extinguisher Info --- */}
+              {/* Extinguisher details */}
               <Text>Location: {item.location}</Text>
               <Text>Manufacture Year: {item.manufactureYear}</Text>
               <Text>Last Inspection: {item.lastInspection}</Text>
@@ -194,7 +198,7 @@ export default function SiteDetail({ navigation, setClients }) {
               <Text>Status: {item.status}</Text>
               {item.notes ? <Text>Notes: {item.notes}</Text> : null}
 
-              {/* --- Button Row --- */}
+              {/* Button Row */}
               <View style={styles.siteButtonRow}>
                 <TouchableOpacity
                   style={styles.saveButton}
@@ -223,4 +227,3 @@ export default function SiteDetail({ navigation, setClients }) {
     </View>
   );
 }
-
