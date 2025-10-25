@@ -47,7 +47,7 @@ export default function Maps({ navigation, clients = [] }) {
       ? site.extinguishers
       : [];
 
-    if (extinguishers.length === 0) return "gray"; // no extinguishers -> gray
+    if (extinguishers.length === 0) return "#bdc3c7"; // no extinguishers -> gray
 
     let hasLate = false;
     let hasServiceDue = false;
@@ -60,10 +60,10 @@ export default function Maps({ navigation, clients = [] }) {
       if (status.includes("inspection")) hasInspectionDue = true; 
     }
 
-    if (hasLate) return "red"; // late
-    if (hasServiceDue) return "purple"; // service due
-    if (hasInspectionDue) return "orange"; // Inspection due
-    return "green"; // OK
+    if (hasLate) return "#F45A5A"; // late
+    if (hasServiceDue) return "#9b59b6"; // service due
+    if (hasInspectionDue) return "#ffcc00ff"; // Inspection due
+    return "#66B166"; // OK
   };
 
   return (
@@ -101,7 +101,7 @@ export default function Maps({ navigation, clients = [] }) {
               }
             >
               <View style={styles.markerWrap}>
-                <View style={[styles.markerDot, { backgroundColor: color }]} />
+                <View style={[styles.statusBubble, { backgroundColor: color }]} />
               </View>
             </Marker>
           );

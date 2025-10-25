@@ -52,7 +52,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
         </Tab.Screen>
         
             <Tab.Screen
-            name="Maps"
+            name="Map"
             options={{
                 headerShown: false,
                 tabBarIcon: ({ color, size }) => (

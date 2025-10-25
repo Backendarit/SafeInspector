@@ -9,7 +9,7 @@ const Stack = createNativeStackNavigator();
 export default function MapsStack({ clients, setClients }) {
   return (
     <Stack.Navigator initialRouteName="MapsScreen" screenOptions={stackHeader}>
-      <Stack.Screen name="MapsScreen" options={{ title: "Maps" }}>
+      <Stack.Screen name="MapsScreen" options={{ title: "Map" }}>
         {(props) => (
           <Maps {...props} clients={clients} setClients={setClients} />
         )}
