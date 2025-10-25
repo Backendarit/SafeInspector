@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { calculateNextInspection, calculateServiceDueDate, calculateExtinguisherStatus } from '../backend/utils/extinguisherUtils';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styles from '../components/styles';
 import { BASE_URL } from "../config";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +26,13 @@ export default function WorkQueue({ clients, setClients }) {
       } finally {
         setRefreshing(false); 
       }
-  };  
+  }; 
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchClients();
+    }, [])
+  );
 
   // extinguisher list combined with clients details and site details
   const extinguisherList = 
