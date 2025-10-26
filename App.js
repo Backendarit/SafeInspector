@@ -40,6 +40,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
+      //pass clients and setClients as props to BottomTabNavigation
       <BottomTabNavigation clients={clients} setClients={setClients} />
     </NavigationContainer>
   );

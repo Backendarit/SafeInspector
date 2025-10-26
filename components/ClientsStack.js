@@ -10,11 +10,14 @@ import SiteUpdate from "../screen/SiteUpdate";
 
 const Stack = createNativeStackNavigator();
 
+//Clients stack navigator component receiving clients and setClients as props from BottomTabNavigation
 export default function ClientsStack({ clients, setClients }) {
 
   return (
+    //initialRouteName sets the default screen when this stack is loaded
     <Stack.Navigator initialRouteName="ClientListScreen" screenOptions={stackHeader}> 
         <Stack.Screen name="ClientListScreen" options={{title: "Clients"} }>
+            //rendering ClientList and passing default props and in addition clients and setClients as props
             {(props) => (
                 <ClientList 
                     {...props}
@@ -24,6 +27,7 @@ export default function ClientsStack({ clients, setClients }) {
             )}
         </Stack.Screen>
         <Stack.Screen name="AddClientScreen" options={{title: "Add Client"}}>
+            //rendering AddClient and passing default props and in addition clients and setClients as props
             {(props) => (
                 <AddClient 
                     {...props}
@@ -32,9 +36,11 @@ export default function ClientsStack({ clients, setClients }) {
                 />
             )}
         </Stack.Screen>
+        //screens for adding and editing extinguishers, no additional props needed so component is provided directly
         <Stack.Screen name="AddExtinguisherScreen" options={{title: "Add Extinguisher"}} component={AddExtinguisher} />
         <Stack.Screen name="EditExtinguisherScreen" options={{title: "Edit Extinguisher"}} component={EditExtinguisher} />
         <Stack.Screen name="SiteDetailScreen" options={{title: "Site Details"}}>
+            //rendering SiteDetail and passing default props and in addition clients and setClients as props
             {(props) => (
                 <SiteDetail 
                     {...props}

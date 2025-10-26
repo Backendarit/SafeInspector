@@ -1,24 +1,47 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { calculateNextInspection, calculateServiceDueDate, calculateExtinguisherStatus } from '../backend/utils/extinguisherUtils';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styles from '../components/styles';
 import { BASE_URL } from "../config";
+import { Ionicons } from "@expo/vector-icons";
 
 
 export default function WorkQueue({ clients, setClients }) {
 
   const navigation = useNavigation();
-  const [filterExt, setFilterExt] = useState("all");
+  // true when user pulls to refresh
+  const [refreshing, setRefreshing] = useState(false); 
+  //filter for extinguisher list, default "all"
+  const [filterExt, setFilterExt] = useState("all"); 
+  // today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
-  //useMemo - react hook to memorize calculated extinguisher list
-  //recalculates only if clients data changes
-  const extinguisherList = useMemo(() => {
-    
-    // all extinguishers combined with clients details and site details
+  //refreshing clients data from backend
+  const fetchClients = async () => {
+    setRefreshing(true);
+    try {
+      const response = await fetch (`${BASE_URL}/api/clients`);
+      const updatedClients = await response.json();
+      setClients(updatedClients);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setRefreshing(false); 
+      }
+  }; 
+  
+  //fetch clients every time when screen is opened
+  useFocusEffect(
+    useCallback(() => {
+      fetchClients();
+    }, [])
+  );
+
+  // extinguisher list combined with clients details and site details
+  const extinguisherList = 
     //go through all clients
-    return clients.flatMap(client =>
+    clients.flatMap(client =>
       //go trhough all sites of each client
       client.sites.flatMap(site =>
         //go through all extinguishers of each site
@@ -50,26 +73,24 @@ export default function WorkQueue({ clients, setClients }) {
         })
       )
     );
-    //only if clients data changes
-  }, [clients]);
-
+ 
   // arrange by status and sort by "all", "dueToday" or "late"
-  const sortExtinguishersByStatus = useMemo(() => {
-    //status order
-    const statusOrder = { "Late": 0, "Service Due": 1, "Inspection Due": 2, "OK": 3 };
+  //status order
+  const statusOrder = { "Late": 0, "Service Due": 1, "Inspection Due": 2, "OK": 3 };
 
-    let filteredExtList = extinguisherList;
-    //extinguishers with status only "dueToday" or "late"
-    if (filterExt === "dueToday") {
-      filteredExtList = extinguisherList.filter(ext => ext.nextInspection === today);
-    } else if (filterExt === "late") {
-      filteredExtList = extinguisherList.filter(ext => ext.status === "Late");
-    }
-    //sort by status order, late first, ok last
-    return [...filteredExtList].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-  }, [extinguisherList, filterExt]);
+  let filteredExtList = extinguisherList;
 
-    // Update Extinguisher Status
+  //extinguishers with status only "dueToday" or "late"
+  if (filterExt === "dueToday") {
+    filteredExtList = extinguisherList.filter(ext => ext.nextInspection === today);
+  } else if (filterExt === "late") {
+    filteredExtList = extinguisherList.filter(ext => ext.status === "Late");
+  }
+  //sort by status order, late first, ok last
+  const sortExtinguishersByStatus = [...filteredExtList].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+ 
+
+  // Update Extinguisher Status
   const handleStatusUpdate = async (item) => {
     try {
       const response = await fetch(
@@ -90,10 +111,11 @@ export default function WorkQueue({ clients, setClients }) {
         return;
       }
 
-      //for messages
+      //updated extinguisher data from backend for updating state  and to show new info in alert after update
       const updatedExtinguisherStatus = backendData.extinguisher;
 
-        // new version of clients list
+        // update clients data with new extinguisher inspection date
+        // everything else remains the same
         setClients(prevClients =>
           prevClients.map(client => 
             //if client matches...
@@ -126,8 +148,26 @@ export default function WorkQueue({ clients, setClients }) {
     }
   };
 
-  const renderExtingusher = ({ item }) => (
-    <View style={styles.siteCard}>
+  //get color and icon based on status
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "OK":
+        return { color: "#66B166", icon: "checkmark" };
+      case "Inspection Due":
+        return { color: "#ffcc00ff", icon: "time-outline" };
+      case "Service Due":
+        return { color: "#9b59b6", icon: "build" };
+      case "Late":
+        return { color: "#F45A5A", icon: "alert" };
+      default:
+        return { color: "#bdc3c7", icon: "help" };
+    }
+  };
+
+  const renderExtingusher = ({ item }) => {
+    const {color, icon} = getStatusStyle(item.status);
+    return(
+    <View style={styles.card}>
       <TouchableOpacity onPress={() => 
       //when navigating to site detail screen, give props site and client so that clientId and siteId match
         navigation.navigate('SiteDetailScreen', { site: clients.find( c => c.id === item.clientId).sites.find( s => s.id === item.siteId), 
@@ -135,13 +175,18 @@ export default function WorkQueue({ clients, setClients }) {
       <View style={styles.siteHeaderRow}> 
         <Text style={styles.siteTitle}>{item.clientName}</Text>
       </View>
+      <View style={[styles.statusBubble, { backgroundColor: color }]}>
+        <Ionicons name={icon} size={16} color="#ffffffff" />
+      </View>
       <View>
+        <Text style={styles.siteExtinguisherName}>{item.type} </Text>
         <Text>Site: {item.siteName}</Text>
         <Text>Location: {item.location}</Text>
         <Text>Next Inspection: {item.nextInspection}</Text>
         <Text>Service Due: {item.serviceDue}</Text>
         <Text>Status: {item.status}</Text>
       </View>
+
       </TouchableOpacity>
       <View style={styles.siteButtonRow}>
         {/* if status is "late", change button color */}
@@ -152,7 +197,8 @@ export default function WorkQueue({ clients, setClients }) {
         </TouchableOpacity>
       </View>
     </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.siteContainer}>
@@ -177,6 +223,10 @@ export default function WorkQueue({ clients, setClients }) {
         data={sortExtinguishersByStatus}
         keyExtractor={(item) => `${item.clientId}-${item.siteId}-${item.id}`}
         renderItem={renderExtingusher}
+        refreshing={refreshing}
+        onRefresh={fetchClients}
+        contentContainerStyle={{ paddingBottom: 80 }}
+        extraData={filterExt}
       />
       </View>
     </View>
