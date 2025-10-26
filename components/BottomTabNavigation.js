@@ -30,7 +30,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 ),
             }}
         >
-            //rendering HomeStack and passing default props and in addition clients and setClients as props
+            {/*rendering HomeStack and passing default props and in addition clients and setClients as props*/}
             {(props) => (
                 <HomeStack
                     {...props}
@@ -48,7 +48,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 ),
             }}
         >
-            //rendering WorkQueueStack and passing default props and in addition clients and setClients as props
+            {/*rendering WorkQueueStack and passing default props and in addition clients and setClients as props*/}
             {(props) => (
                 <WorkQueueStack 
                     {...props}
@@ -67,7 +67,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 ),
             }}
         >
-            //rendering MapsStack and passing default props and in addition clients and setClients as props
+            {/*rendering MapsStack and passing default props and in addition clients and setClients as props*/}
             {(props) => (
                 <MapsStack
                     {...props}
@@ -84,7 +84,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 ),
             }}
         >
-            //rendering ClientsStack and passing default props and in addition clients and setClients as props
+            {/*rendering ClientsStack and passing default props and in addition clients and setClients as props*/}
             {(props) => (
                 <ClientsStack 
                     {...props}
