@@ -8,7 +8,7 @@ const Stack = createNativeStackNavigator();
 
 export default function WorkQueueStack({ clients, setClients }) {
   return (
-    <Stack.Navigator initialRouteName="WorkQueueScreen">
+    <Stack.Navigator initialRouteName="WorkQueueScreen" screenOptions={stackHeader}>
         <Stack.Screen name="WorkQueueScreen" options={{title: "Work Queue"}}>
           {(props) => (
             <WorkQueue 
