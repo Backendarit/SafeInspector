@@ -15,14 +15,14 @@ export default function HomeStack({ clients, setClients }) {
       screenOptions={{ headerShown: false }}  
     >
       <Stack.Screen name="HomeScreen">
-        //rendering Home screen and passing clients and setClients as props in addition to default props
+        {/*rendering Home screen and passing clients and setClients as props in addition to default props*/}
         {(props) => (
           <Home {...props} clients={clients} setClients={setClients} />
         )}
       </Stack.Screen>
 
       <Stack.Screen name="WorkQueueScreen" options={{ title: "Work Queue" }}>
-        //rendering WorkQueue screen and passing clients and setClients as props in addition to default props
+        {/*rendering WorkQueue screen and passing clients and setClients as props in addition to default props*/}
         {(props) => (
           <WorkQueue {...props} clients={clients} setClients={setClients} />
         )}
