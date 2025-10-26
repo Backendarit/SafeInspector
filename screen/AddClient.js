@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { BASE_URL } from "../config";
+import { saveClients } from "../sqlconnection/db"; 
 
 import styles from '../components/styles';
 
@@ -94,42 +95,14 @@ export default function AddClient({ navigation, clients = [], setClients }) {
 
       const data = await response.json();
 
-      // Show new client on clientlist
-      if (data.client) {
-        setClients((prev) => [...prev, data.client]);
-        // Save to local SQLite
-        try {
-          const { addClient } = await import('../sqlconnection/db');
-          await addClient(data.client);
-        } catch (e) {
-          console.log('SQLite addClient failed', e);
-        }
+      //Fetch the full updated client list after successful POST
+      const listRes = await fetch(`${BASE_URL}/api/clients`);
+      if (!listRes.ok) throw new Error("Fetching updated list failed.");
+      const latest = await listRes.json();
 
-        
-      } else if (data.site) {
-        // New site added to existing client
-        setClients((prev) =>
-          prev.map((c) =>
-            String(c.id) === String(selectedClient)
-              ? { ...c, sites: [...c.sites, data.site] }
-              : c
-          )
-        );
-        // Find updated client and save to SQLite
-        const updatedClient = clients.find((c) => String(c.id) === String(selectedClient));
-        if (updatedClient) {
-          const newClientData = {
-            ...updatedClient,
-            sites: [...updatedClient.sites, data.site],
-          };
-          try {
-            const { addClient } = await import('../sqlconnection/db');
-            await addClient(newClientData);
-          } catch (e) {
-            console.log('SQLite addClient failed', e);
-          }
-        }
-      }
+      // Update React state and save full list to SQLite cache
+      setClients(latest);
+      await saveClients(latest);
 
       Alert.alert("Success", "Data saved successfully!");
       navigation.goBack();

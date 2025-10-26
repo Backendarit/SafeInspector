@@ -14,7 +14,7 @@ export default function Home({ navigation, clients = [], setClients }) {
   // Get today's date in format YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0];
 
-  // Get the latest client data when Home opens
+  // Get the latest client data when Home screen opens
     useFocusEffect(
     useCallback(() => {
       const fetchClients = async () => {

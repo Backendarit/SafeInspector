@@ -1,8 +1,8 @@
 import * as SQLite from 'expo-sqlite';
 
-// open or create database and table
+// Open or create the local SQLite database and ensure the "clients" table exists
 export const init = async () => {
-  const db = await SQLite.openDatabaseAsync('safeinspector.db');
+  const db = await SQLite.openDatabaseAsync('safeinspector.db'); // Open database file
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS clients (
@@ -10,47 +10,31 @@ export const init = async () => {
       json TEXT NOT NULL
     );
   `);
-  return db;
+  return db; // Return the database connection
 };
 
-// Add or update one client
-export const addClient = async (client) => {
-  const db = await init();
-  const statement = await db.prepareAsync(
-    'REPLACE INTO clients (id, json) VALUES ($id, $json)'
-  );
-  try {
-    await statement.executeAsync({
-      $id: String(client.id),
-      $json: JSON.stringify(client),
-    });
-  } finally {
-    await statement.finalizeAsync();
-  }
-};
-
-// Save all clients at once (used after Azure fetch)
+// Save all clients to the local database after fetching the latest data from the cloud
 export const saveClients = async (clients) => {
-  const db = await init();
-  await db.execAsync('DELETE FROM clients;');
+  const db = await init(); // Open database connection
+  await db.execAsync('DELETE FROM clients;'); // Clear old data before saving
   const statement = await db.prepareAsync(
-    'INSERT INTO clients (id, json) VALUES ($id, $json)'
+    'REPLACE INTO clients (id, json) VALUES ($id, $json)' // Insert or update clients
   );
   try {
     for (const client of (clients || [])) {
       await statement.executeAsync({
-        $id: String(client.id),
-        $json: JSON.stringify(client),
+        $id: String(client.id),     // Use client ID as key
+        $json: JSON.stringify(client), // Store client data as JSON string
       });
     }
   } finally {
-    await statement.finalizeAsync();
+    await statement.finalizeAsync(); // Close prepared statement
   }
 };
 
-// Read all clients from SQLite
+// Read all clients from SQLite and return them as JavaScript objects
 export const fetchAllClients = async () => {
-  const db = await init();
-  const rows = await db.getAllAsync('SELECT json FROM clients;');
-  return rows.map(row => JSON.parse(row.json));
+  const db = await init(); // Open database connection
+  const rows = await db.getAllAsync('SELECT json FROM clients;'); //Read all rows
+  return rows.map(row => JSON.parse(row.json)); //Convert JSON strings back to objects that we can use
 };

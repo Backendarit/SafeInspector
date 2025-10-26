@@ -14,7 +14,9 @@ const DEFAULT_REGION = {
 };
 
 export default function Maps({ navigation, clients = [] }) {
+    // The map starts from Tampere area
   const [region] = useState(DEFAULT_REGION);
+  // Store client data that will be shown on the map
   const [data, setData] = useState(Array.isArray(clients) ? clients : []);
 
   // Fetch data again every time this screen is opened
@@ -22,8 +24,10 @@ export default function Maps({ navigation, clients = [] }) {
     useCallback(() => {
       (async () => {
         try {
+           // Ask newest client data from the server
           const response = await fetch(`${BASE_URL}/api/clients`);
           const fresh = await response.json();
+           // If the data looks correct, save it to state
           if (Array.isArray(fresh)) setData(fresh);
         } catch (error) {
           console.log("Error fetching clients:", error);
@@ -32,12 +36,12 @@ export default function Maps({ navigation, clients = [] }) {
     }, [])
   );
 
-  // Build site list
+   // Make one list that includes every site from every client
   const allSites = [];
   for (const client of Array.isArray(data) ? data : []) {
-    if (!client?.sites) continue;
+    if (!client?.sites) continue; // Skip clients that have no sites
     for (const site of client.sites) {
-      allSites.push({ client, site });
+      allSites.push({ client, site }); // Add the site and remember its client
     }
   }
 
@@ -55,9 +59,9 @@ export default function Maps({ navigation, clients = [] }) {
 
     for (const e of extinguishers) {
       const status = String(e.status || "").toLowerCase();
-      if (status.includes("late")) hasLate = true;
-      if (status.includes("service")) hasServiceDue = true;
-      if (status.includes("inspection")) hasInspectionDue = true; 
+      if (status.includes("late")) hasLate = true; // Found late extinguisher
+      if (status.includes("service")) hasServiceDue = true;  // Found late extinguisher
+      if (status.includes("inspection")) hasInspectionDue = true; // Needs inspection
     }
 
     if (hasLate) return "#F45A5A"; // late
@@ -68,6 +72,7 @@ export default function Maps({ navigation, clients = [] }) {
 
   return (
     <View style={styles.backgroundContainer}>
+      {/* Map that shows all client sites as markers */}
       <MapView
         style={StyleSheet.absoluteFill}
         provider="google"
@@ -75,13 +80,15 @@ export default function Maps({ navigation, clients = [] }) {
         showsUserLocation
       >
         {allSites.map(({ client, site }) => {
-          const key = `${client.id}:${site.id}`;
+          const key = `${client.id}:${site.id}`; // Unique key for each site
           const coord = site?.coords
             ? {
                 latitude: Number(site.coords.latitude),
                 longitude: Number(site.coords.longitude),
               }
             : null;
+
+          // Skip this site if coordinates are missing or wrong
           if (
             !coord ||
             Number.isNaN(coord.latitude) ||
@@ -89,21 +96,25 @@ export default function Maps({ navigation, clients = [] }) {
           )
             return null;
 
-          const color = getPinColor(site);
+          const color = getPinColor(site); // Decide the correct marker color
 
           return (
-            <Marker
-              key={key}
-              coordinate={coord}
-              title={site.name} 
-              onCalloutPress={() =>
-                navigation.navigate("SiteDetailScreen", { site, client })
-              }
-            >
-              <View style={styles.markerWrap}>
-                <View style={[styles.statusBubble, { backgroundColor: color }]} />
-              </View>
-            </Marker>
+        <Marker
+          key={key}
+          coordinate={coord}
+          title={site.name}
+          onCalloutPress={() =>
+            navigation.navigate('Clients', {
+              screen: 'SiteDetailScreen',
+              params: { site, client },
+            })
+          }
+        >
+        <View style={styles.markerWrap}>
+          <View style={[styles.statusBubble, { backgroundColor: color }]} />
+        </View>
+      </Marker>
+
           );
         })}
       </MapView>
