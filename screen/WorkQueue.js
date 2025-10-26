@@ -10,11 +10,14 @@ import { Ionicons } from "@expo/vector-icons";
 export default function WorkQueue({ clients, setClients }) {
 
   const navigation = useNavigation();
-  const [refreshing, setRefreshing] = useState(false); // true when user pulls to refresh
-  const [filterExt, setFilterExt] = useState("all");
+  // true when user pulls to refresh
+  const [refreshing, setRefreshing] = useState(false); 
+  //filter for extinguisher list, default "all"
+  const [filterExt, setFilterExt] = useState("all"); 
+  // today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
 
-  //refreshing clients
+  //refreshing clients data from backend
   const fetchClients = async () => {
     setRefreshing(true);
     try {
@@ -28,6 +31,7 @@ export default function WorkQueue({ clients, setClients }) {
       }
   }; 
   
+  //fetch clients every time when screen is opened
   useFocusEffect(
     useCallback(() => {
       fetchClients();
@@ -107,10 +111,11 @@ export default function WorkQueue({ clients, setClients }) {
         return;
       }
 
-      //for messages
+      //updated extinguisher data from backend for updating state  and to show new info in alert after update
       const updatedExtinguisherStatus = backendData.extinguisher;
 
-        // new version of clients list
+        // update clients data with new extinguisher inspection date
+        // everything else remains the same
         setClients(prevClients =>
           prevClients.map(client => 
             //if client matches...
@@ -143,6 +148,7 @@ export default function WorkQueue({ clients, setClients }) {
     }
   };
 
+  //get color and icon based on status
   const getStatusStyle = (status) => {
     switch (status) {
       case "OK":

@@ -8,8 +8,10 @@ const Stack = createNativeStackNavigator();
 
 export default function WorkQueueStack({ clients, setClients }) {
   return (
+    //initialRouteName sets the default screen when this stack is loaded
     <Stack.Navigator initialRouteName="WorkQueueScreen">
         <Stack.Screen name="WorkQueueScreen" options={{title: "Work Queue"}}>
+          //rendering WorkQueue screen and passing clients and setClients as props in addition to default props
           {(props) => (
             <WorkQueue 
                 {...props}
@@ -19,6 +21,7 @@ export default function WorkQueueStack({ clients, setClients }) {
             )}
         </Stack.Screen>
         <Stack.Screen name="SiteDetailScreen" options={{title: "Site Detail"}}>
+          //rendering SiteDetail screen and passing clients and setClients as props in addition to default props
           {(props) => (
             <SiteDetail 
                 {...props}

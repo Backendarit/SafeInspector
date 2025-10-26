@@ -10,38 +10,45 @@ import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
+//Bottom tab navigation component receiving clients and setClients as props
 export default function BottomTabNavigation({ clients, setClients }) {
     return (
        <Tab.Navigator
             screenOptions={{
+                //colors for active and inactive bottom tab icons
                 tabBarActiveTintColor: '#176817',
                 tabBarInactiveTintColor: '#66B166',
                 headerShown: false
             }}
         >
-        <Tab.Screen name="Home"
-                options={{
-                    tabBarIcon: ({ color, size }) => (
+        <Tab.Screen 
+            name="Home"
+            options={{
+                //icon for home tab, size automatically provided by react navigation, colors from screenOptions
+                tabBarIcon: ({ color, size }) => (
                     <Ionicons name="home" size={size} color={color} />
-                    ),
-                }}
-                >
-                {(props) => (
-                    <HomeStack
+                ),
+            }}
+        >
+            //rendering HomeStack and passing default props and in addition clients and setClients as props
+            {(props) => (
+                <HomeStack
                     {...props}
                     clients={clients}
                     setClients={setClients}
-                    />
-                )}
-                </Tab.Screen>
+                />
+            )}
+        </Tab.Screen>
 
 
-        <Tab.Screen name="WorkQueue" 
+        <Tab.Screen 
+            name="WorkQueue" 
             options={{ tabBarIcon: ({ color, size }) => (
                 <Ionicons name='checkmark-circle' size={size} color={color}/>
                 ),
             }}
         >
+            //rendering WorkQueueStack and passing default props and in addition clients and setClients as props
             {(props) => (
                 <WorkQueueStack 
                     {...props}
@@ -51,7 +58,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
             )}    
         </Tab.Screen>
         
-            <Tab.Screen
+        <Tab.Screen
             name="Map"
             options={{
                 headerShown: false,
@@ -60,6 +67,7 @@ export default function BottomTabNavigation({ clients, setClients }) {
                 ),
             }}
         >
+            //rendering MapsStack and passing default props and in addition clients and setClients as props
             {(props) => (
                 <MapsStack
                     {...props}
@@ -69,12 +77,14 @@ export default function BottomTabNavigation({ clients, setClients }) {
             )}
         </Tab.Screen>
 
-        <Tab.Screen name="Clients" 
+        <Tab.Screen 
+            name="Clients" 
             options={{ tabBarIcon: ({ color, size }) => (
                 <Ionicons name='people' size={size} color={color} />
                 ),
             }}
         >
+            //rendering ClientsStack and passing default props and in addition clients and setClients as props
             {(props) => (
                 <ClientsStack 
                     {...props}
