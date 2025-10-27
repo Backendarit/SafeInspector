@@ -3,6 +3,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import WorkQueue from "../screen/WorkQueue";
 import SiteDetail from "../screen/SiteDetail";
 import { stackHeader } from "../components/headerOptions"; 
+import AddExtinguisher from "../screen/AddExtinguisher";
+import EditExtinguisher from "../screen/EditExtinguisher";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +32,8 @@ export default function WorkQueueStack({ clients, setClients }) {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="AddExtinguisherScreen" options={{title: "Add Extinguisher"}} component={AddExtinguisher} />
+          <Stack.Screen name="EditExtinguisherScreen" options={{title: "Edit Extinguisher"}} component={EditExtinguisher} />
     </Stack.Navigator>
     );
 }

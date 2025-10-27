@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SiteDetail from "../screen/SiteDetail";
 import Maps from "../screen/Map";   
 import { stackHeader } from "../components/headerOptions"; 
+import AddExtinguisher from "../screen/AddExtinguisher";
+import EditExtinguisher from "../screen/EditExtinguisher";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,13 +18,15 @@ export default function MapsStack({ clients, setClients }) {
           <Maps {...props} clients={clients} setClients={setClients} />
         )}
       </Stack.Screen>
-
+      
       <Stack.Screen name="SiteDetailScreen" options={{ title: "Site Detail" }}>
         {/*rendering SiteDetail screen and passing clients and setClients as props in addition to default props*/}
         {(props) => (
           <SiteDetail {...props} clients={clients} setClients={setClients} />
         )}
       </Stack.Screen>
+      <Stack.Screen name="AddExtinguisherScreen" options={{title: "Add Extinguisher"}} component={AddExtinguisher} />
+      <Stack.Screen name="EditExtinguisherScreen" options={{title: "Edit Extinguisher"}} component={EditExtinguisher} />
     </Stack.Navigator>
   );
 }
