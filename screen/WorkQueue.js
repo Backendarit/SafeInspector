@@ -170,14 +170,8 @@ export default function WorkQueue({ clients, setClients }) {
     <View style={styles.card}>
       <TouchableOpacity onPress={() => 
       //when navigating to site detail screen, give props site and client so that clientId and siteId match
-        navigation.navigate('Clients', {
-          screen: 'SiteDetailScreen',
-          params: {
-            site: clients.find(c => c.id === item.clientId).sites.find(s => s.id === item.siteId),
-            client: clients.find(c => c.id === item.clientId),
-          },
-        })
-      }>
+        navigation.navigate('SiteDetailScreen', { site: clients.find( c => c.id === item.clientId).sites.find( s => s.id === item.siteId), 
+        client: clients.find( c => c.id === item.clientId) })}>
       <View style={styles.siteHeaderRow}> 
         <Text style={styles.siteTitle}>{item.clientName}</Text>
       </View>

@@ -99,21 +99,18 @@ export default function Maps({ navigation, clients = [] }) {
           const color = getPinColor(site); // Decide the correct marker color
 
           return (
-        <Marker
-          key={key}
-          coordinate={coord}
-          title={site.name}
-          onCalloutPress={() =>
-            navigation.navigate('Clients', {
-              screen: 'SiteDetailScreen',
-              params: { site, client },
-            })
-          }
-        >
-        <View style={styles.markerWrap}>
-          <View style={[styles.statusBubble, { backgroundColor: color }]} />
-        </View>
-      </Marker>
+            <Marker
+              key={key}
+              coordinate={coord}
+              title={site.name} 
+              onCalloutPress={() =>
+                navigation.navigate("SiteDetailScreen", { site, client })
+              }
+            >
+              <View style={styles.markerWrap}>
+                <View style={[styles.statusBubble, { backgroundColor: color }]} />
+              </View>
+            </Marker>
 
           );
         })}
