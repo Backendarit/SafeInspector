@@ -13,19 +13,23 @@ import { saveClients } from "../sqlconnection/db";
 
 import styles from '../components/styles';
 
+// Screen for adding a new client or adding a new site to an existing client
 export default function AddClient({ navigation, clients = [], setClients }) {
-  const [selectedClient, setSelectedClient] = useState("new");
-  const [clientName, setClientName] = useState("");
-  const [businessId, setBusinessId] = useState("");
-  const [siteName, setSiteName] = useState("");
-  const [address, setAddress] = useState("");
-  const [contact, setContact] = useState("");
-  const [phone, setPhone] = useState("");
-  const [latitude, setLatitude] = useState("");  
-  const [longitude, setLongitude] = useState(""); 
-  const [loading, setLoading] = useState(false); // load POST
+  // State variables to store the form values the user types in
+  const [selectedClient, setSelectedClient] = useState("new"); //Default: "new client"
+  const [clientName, setClientName] = useState(""); //For new client name
+  const [businessId, setBusinessId] = useState(""); // For new client business ID
+  const [siteName, setSiteName] = useState(""); //Every new client must include one site
+  const [address, setAddress] = useState(""); //Site address
+  const [contact, setContact] = useState(""); // Contact person name  
+  const [phone, setPhone] = useState(""); //Contact phone number
+  const [latitude, setLatitude] = useState("");  //Optional coordinate (latitude) for map
+  const [longitude, setLongitude] = useState("");  //Optiona coordinate (longitude) for map
+  const [loading, setLoading] = useState(false); // Shows loading state while POST request is happening
 
+  
   const handleSave = async () => {
+    //Make sure required fields are filled
     if (selectedClient === "new" && clientName.trim() === "") {
       Alert.alert("Error", "Please enter a client name.");
       return;
@@ -35,7 +39,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       return;
     }
 
-    //send coords only if valid numbers
+    // Convert coordinates to numbers only if they are typed correctly
     const latNum = latitude === "" ? null : Number(latitude);
     const lngNum = longitude === "" ? null : Number(longitude);
     const hasCoords =
@@ -48,39 +52,38 @@ export default function AddClient({ navigation, clients = [], setClients }) {
 
     try {
       let response;
-
+      // If user chooses "new client"
       if (selectedClient === "new") {
-        // New Client
         const newClient = {
           name: clientName,
           businessId,
           sites: [
             {
-              id: Date.now().toString() + "-site",
+              id: Date.now().toString() + "-site", // Unique ID for new site
               name: siteName,
               address,
               contact: { name: contact, phone },
-              extinguishers: [],
-              ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), // coordinates
+              extinguishers: [], // New site starts without extinguishers
+              ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), // Add map coordinates only if valid
             },
           ],
         };
-      // POST to Azure
+      //POST to Azure backend: create a new client that includes one initial site
         response = await fetch(`${BASE_URL}/api/clients`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newClient),
         });
       } else {
-        // New Site to old Client
+        // Add a new site to an existing client
         const newSite = {
           name: siteName,
           address,
           contact: { name: contact, phone },
           extinguishers: [],
-          ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), //coordinates
+          ...(hasCoords ? { coords: { latitude: latNum, longitude: lngNum } } : {}), // Add map coordinates only if valid
         };
-
+        // Sent to backend: add site to existing client
         response = await fetch(`${BASE_URL}/api/clients/${selectedClient}/sites`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,7 +103,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
       if (!listRes.ok) throw new Error("Fetching updated list failed.");
       const latest = await listRes.json();
 
-      // Update React state and save full list to SQLite cache
+      // Update React state and save full list to SQLite (offline database)
       setClients(latest);
       await saveClients(latest);
 
@@ -116,7 +119,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
 
   return (
     <ScrollView style={styles.backgroundContainer}> 
-
+  {/* Select existing client or choose to create a new one */}
       <Text style={styles.label}>Select client</Text>
       <Picker
         selectedValue={selectedClient}
@@ -124,13 +127,15 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         style={styles.input}
       >
         <Picker.Item label="New client" value="new" />
+         {/* Show all clients in dropdown if available */}
         {clients && clients.length > 0
           ? clients.map((c) => (
               <Picker.Item key={c.id} label={c.name} value={c.id} />
             ))
           : null}
       </Picker>
-
+    
+{/* These fields are only visible if adding a new client */}
       {selectedClient === "new" && (
         <>
           <Text style={styles.label}>Client name</Text>
@@ -150,6 +155,9 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         </>
       )}
 
+
+    {/* Always needed when adding a new site */}
+     {/* Site name */}
       <Text style={styles.label}>Site name</Text>
       <TextInput
         style={styles.input}
@@ -157,7 +165,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         onChangeText={setSiteName}
         placeholder="e.g. Sale Härmälänranta Tampere"
       />
-
+       {/* Address*/}
       <Text style={styles.label}>Address</Text>
       <TextInput
         style={styles.input}
@@ -165,7 +173,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         onChangeText={setAddress}
         placeholder="e.g. Lentovarikonkatu 1, 33900 Tampere"
       />
-
+         {/* Contact person*/}
       <Text style={styles.label}>Contact person</Text>
       <TextInput
         style={styles.input}
@@ -173,7 +181,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         onChangeText={setContact}
         placeholder="e.g. Maija Menninkäinen"
       />
-
+         {/* Phone number */}
       <Text style={styles.label}>Phone number</Text>
       <TextInput
         style={styles.input}
@@ -183,7 +191,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         keyboardType="phone-pad"
       />
 
-      {/* coordinate fields */}
+      {/* Coordinate fields (optional) */}
       <Text style={styles.label}>Latitude (optional)</Text>
       <TextInput
         style={styles.input}
@@ -202,6 +210,7 @@ export default function AddClient({ navigation, clients = [], setClients }) {
         keyboardType="numeric"
       />
 
+       {/* Save button */}
       <TouchableOpacity
         style={[styles.saveButton, loading && { opacity: 0.6 }]}
         onPress={handleSave}
