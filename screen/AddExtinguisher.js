@@ -13,7 +13,7 @@ import styles from "../components/styles";
 export default function AddExtinguisher({ route, navigation }) {
   const { clientId, siteId } = route.params;
 
-  // Input fields
+  // Input fields for new extinguisher
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
   const [manufactureYear, setManufactureYear] = useState("");
@@ -28,8 +28,9 @@ export default function AddExtinguisher({ route, navigation }) {
       return;
     }
 
+    // Create a new extinguisher object from user input
     const newExtinguisher = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // temporary unique ID (backend will handle final ID)
       type,
       location,
       manufactureYear: parseInt(manufactureYear, 10),
@@ -40,6 +41,7 @@ export default function AddExtinguisher({ route, navigation }) {
     };
 
     try {
+      // Send new extinguisher to backend API
       const response = await fetch(
         `${BASE_URL}/api/clients/${clientId}/sites/${siteId}/extinguishers`,
         {
@@ -51,7 +53,7 @@ export default function AddExtinguisher({ route, navigation }) {
 
       const data = await response.json();
 
-      // Jos backend esti lisäämisen
+      // Backend may reject creation if inspection is blocked
       if (!response.ok && data.error === "Inspection blocked") {
         Alert.alert(
           "Cannot Add Extinguisher",
@@ -60,9 +62,10 @@ export default function AddExtinguisher({ route, navigation }) {
         );
         return;
       }
-
+      // General server error handling
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
-
+      
+      // Success message and navigate back to site details
       Alert.alert("Saved!", "New extinguisher added successfully.");
       navigation.goBack();
     } catch (err) {
@@ -125,7 +128,7 @@ export default function AddExtinguisher({ route, navigation }) {
         value={notes}
         onChangeText={setNotes}
       />
-
+      {/* --- Save Button --- */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveText}>Save Extinguisher</Text>
       </TouchableOpacity>

@@ -7,8 +7,9 @@ import styles from '../components/styles';
 export default function EditExtinguisher() {
   const route = useRoute();
   const navigation = useNavigation();
+  // Get extinguisher, site, and client data passed from the previous screen
   const { extinguisher, site, client } = route.params;
-
+  //Local state for the extinguisher form.
   const [form, setForm] = useState({
     id: extinguisher.id,
     type: extinguisher.type,
@@ -19,7 +20,7 @@ export default function EditExtinguisher() {
     status: extinguisher.status,
     notes: extinguisher.notes || "",
   });
-
+  //Helper function for updating a specific field in the form.
   const handleChange = (key, value) => setForm({ ...form, [key]: value });
 
   // Update Extinguisher Information
@@ -30,7 +31,7 @@ export default function EditExtinguisher() {
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
+          body: JSON.stringify(form), // send the updated form data
         }
       );
       const data = await response.json();  
@@ -61,6 +62,7 @@ export default function EditExtinguisher() {
                 { method: "DELETE" }
               );
               if (!response.ok) throw new Error("Delete failed");
+              // Show confirmation and return to previous screen
               Alert.alert("Deleted", "Extinguisher removed.");
               navigation.goBack();
             } catch (err) {
@@ -73,10 +75,11 @@ export default function EditExtinguisher() {
     );
   };
 
-
+  //Displays editable text fields for extinguisher properties.
+  //Automatically maps over all keys in `form` (except ID) to generate inputs.
   return (
     <ScrollView style={styles.backgroundContainer}>
-
+      {/* Loop through form fields dynamically (skip ID) */}
       {Object.keys(form).map((key) => (
         key !== "id" && (
           <View key={key}>
@@ -89,6 +92,7 @@ export default function EditExtinguisher() {
           </View>
         )
       ))}
+      {/* Bottom button row: Delete and Save */}
       <View style={styles.siteButtonRow}>
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.saveText}>Delete Extinguisher</Text>
